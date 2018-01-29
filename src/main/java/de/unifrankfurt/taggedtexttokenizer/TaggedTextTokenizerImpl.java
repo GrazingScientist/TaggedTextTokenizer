@@ -1,4 +1,4 @@
-package uni_frankfurt;
+package de.unifrankfurt.taggedtexttokenizer;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -11,6 +11,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
+import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
 
 /**
  * The code is partially (especially the basic input pattern) copied from the ClassicTokenizerImpl. 
@@ -42,61 +44,6 @@ public class TaggedTextTokenizerImpl {
   private static boolean DEBUGGING = false;
   private static final String DUMMY_ROOT = "doc";
   private static final String REMOVE_CHARACTERS_REGEX = "[-+_!@#$%^&*.,?]";
-
-  /** Stores the meta data for the single tokens.
-   *  This class is inspired by the BufferedOutputToken. */
-  class BufferedOutputTag {
-    
-    String term;
-    String tagName;
-    int startNode;
-    int endNode;
-    HashMap<String, String> attributes;
-
-    public BufferedOutputTag(String tagName, String term, int startNode, int endNode) {
-      this.term = term;
-      this.startNode = startNode;
-      this.endNode = endNode;
-      this.tagName = tagName;
-      this.attributes = null;
-    }
-
-    public void addText(String text) {
-      if (DEBUGGING) {
-        System.out.println("Add text: " + text + " to " + this.tagName);
-      }
-
-      this.term += text;
-    }
-
-    public void addAttributes(String idName, String idValue) {
-      if (this.attributes == null) {
-        this.attributes = new HashMap<String, String>();
-      }
-
-      this.attributes.put(idName, idValue);
-    }
-
-    public boolean hasAttributes() {
-      if (this.attributes == null) {
-        return false;
-      }
-      
-      return this.attributes.size() > 0;
-    }
-
-    public String getAttributeValue(String attName) {
-      return attributes.get(attName);
-    }
-
-    public int getStartNode() {
-      return this.startNode;
-    }
-    
-    public int getEndNode() {
-      return this.endNode;
-    }
-  }
 
   /** Constructor for the TaggedTextTokenizerImpl. */
   public TaggedTextTokenizerImpl() {}

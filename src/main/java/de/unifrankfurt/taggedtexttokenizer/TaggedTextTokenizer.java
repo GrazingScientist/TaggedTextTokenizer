@@ -2,7 +2,7 @@
 * Fachinformationsdienst Biodiversität
 */
 
-package uni_frankfurt;
+package de.unifrankfurt.taggedtexttokenizer;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeFactory;
-import uni_frankfurt.TaggedTextTokenizerImpl.BufferedOutputTag;
+import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
 
 
 public final class TaggedTextTokenizer extends Tokenizer {

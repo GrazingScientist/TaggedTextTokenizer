@@ -2,16 +2,16 @@
 * Fachinformationsdienst Biodiversität
 */
 
-package org.apache.lucene.analysis.standard;
+package de.unifrankfurt.taggedtexttokenizer;
 
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.util.BaseTokenStreamFactoryTestCase;
-import uni_frankfurt.TaggedTextTokenizer;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import de.unifrankfurt.taggedtexttokenizer.TaggedTextTokenizer;
 
-public class TestTaggedTextTokenizer extends BaseTokenStreamFactoryTestCase {
+public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
   
   HashMap<String, String[]> testSearchedAttributes = new HashMap<String, String[]>();
   
