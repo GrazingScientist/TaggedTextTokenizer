@@ -1,5 +1,5 @@
 /** University Library of Frankfurt. 2018
-* Fachinformationsdienst Biodiversität
+* Specialised Information Service Biodiversity Research
 */
 
 package de.unifrankfurt.taggedtexttokenizer;

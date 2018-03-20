@@ -1,3 +1,7 @@
+/** University Library of Frankfurt. 2018
+* Specialised Information Service Biodiversity Research
+*/
+
 package de.unifrankfurt.taggedtexttokenizer;
 
 import java.io.IOException;

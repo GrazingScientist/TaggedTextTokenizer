@@ -1,5 +1,5 @@
 /** University Library of Frankfurt. 2018
-* Fachinformationsdienst Biodiversität
+* Specialised Information Service Biodiversity Research
 */
 
 package de.unifrankfurt.taggedtexttokenizer;
@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import javax.xml.stream.XMLStreamException;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
@@ -17,7 +18,6 @@ import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeFactory;
 import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
-
 
 public final class TaggedTextTokenizer extends Tokenizer {
 
@@ -77,8 +77,9 @@ public final class TaggedTextTokenizer extends Tokenizer {
   /** Creates a new TaggedTextTokenizer with a given 
    * {@link org.apache.lucene.util.AttributeFactory}.
    */
-  public TaggedTextTokenizer(AttributeFactory factory) {
+  public TaggedTextTokenizer(AttributeFactory factory, HashMap<String, String[]> searchedAttributes) {
     super(factory);
+    this.searchedAttributes.putAll(searchedAttributes);
     init();
   }
   
