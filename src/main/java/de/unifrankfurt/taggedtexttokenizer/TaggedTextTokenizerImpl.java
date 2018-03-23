@@ -46,11 +46,16 @@ public class TaggedTextTokenizerImpl {
 
   // Constants
   private static boolean DEBUGGING = false;
+  private static boolean XML_READER_NAMESPACE_AWARE = false;
   private static final String DUMMY_ROOT = "doc";
-  private static final String REMOVE_CHARACTERS_REGEX = "[-+_!@#$%^&*.,?]";
-
+  private static final String SPECIAL_CHARACTERS_REGEX = "[\\p{Punct}]";
+  private static final String NON_SPECIAL_CHARACTERS_REGEX = "[^\\p{Punct}]";
+  
   /** Constructor for the TaggedTextTokenizerImpl. */
-  public TaggedTextTokenizerImpl() {}
+  public TaggedTextTokenizerImpl() {
+    // Configures if the XML Reader is sensitive for the given namespaces
+    xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, XML_READER_NAMESPACE_AWARE);
+  }
   
   /** Parse the text to into the xml reader. This is all done in one go, because we need
    * to know the whole text with all tags to process the XML. 
@@ -60,7 +65,11 @@ public class TaggedTextTokenizerImpl {
       // A cursor moves successively over the text and triggers at 'events'.
       // Here, an event is an opening tag, text character, or a closing tag.
       int event = xmlStreamReader.getEventType();
+      
+      // Read XML stream
       while (true) {
+        
+        // XML event handling
         switch (event) {
               
           // Found an opening tag
@@ -128,9 +137,9 @@ public class TaggedTextTokenizerImpl {
       ch = input.read();
     }
     
-    // insert a dummy root at the start and the end
+    // Insert a dummy root at the start and the end
     // This will be ignored by the reader, but is necessary for the XML Reader
-    // to accept the input.
+    // to accept some input.
     bldr.insert(0, "<" + DUMMY_ROOT + ">");
     bldr.insert(bldr.length(), "</" + DUMMY_ROOT + ">");
     
@@ -204,27 +213,43 @@ public class TaggedTextTokenizerImpl {
     // For every token...
     for (String token : text.split(" ")) {
       
+      // Seperate the token from the special characters
+      // Be aware that the regex searches the characters that should NOT be included,
+      // since here applies a replace-function
+      String alphaNumericOnly = token.replaceAll(SPECIAL_CHARACTERS_REGEX, "");
+      String specialCharactersOnly = token.replaceAll(NON_SPECIAL_CHARACTERS_REGEX, "");
+      
+      // Also seperate the special characters coming before and after the token
+      String specialCharactersBeforeToken = token.replaceAll(NON_SPECIAL_CHARACTERS_REGEX + "+.*$", "");
+      String specialCharactersAfterToken = token.replaceAll("^.*?" + NON_SPECIAL_CHARACTERS_REGEX + "+", "");
+      
+      //System.out.println("Before: \"" + specialCharactersBeforeToken + "\"");
+      //System.out.println("After: \"" + specialCharactersAfterToken + "\"");
+      
       // Jump over (multiple) special characters and only increment the offset
-      if (token.replaceAll(REMOVE_CHARACTERS_REGEX, "").isEmpty()) {
+      if (alphaNumericOnly.isEmpty()) {
         incrementTextOffset(token);
         continue;
       }
       
       if (DEBUGGING) {
-        System.out.println("Creating single node with text : " + token);
+        System.out.println("Creating single node with text : " + alphaNumericOnly);
       }
       
+      // Increase the offset counter, if there are special characters in front of the token
+      incrementTextOffset(specialCharactersBeforeToken);
+      
       // Create a new BufferedOutputTag
-      BufferedOutputTag tag = createNewOpenTag(token);
+      BufferedOutputTag tag = createNewOpenTag(alphaNumericOnly);
       tag.startNode = getCurrentTextOffset();
-      tag.endNode = incrementTextOffset(token);
-      tag.addText(token);
+      tag.endNode = incrementTextOffset(alphaNumericOnly);
+      tag.addText(alphaNumericOnly);
       
       // Store the BufferedOutputTag directly in the output list
       outputList.add(tag);
       
       // Increment the offset counter by 1 to set it to the next token's starting position
-      incrementTextOffset(1);
+      incrementTextOffset(1 + specialCharactersAfterToken.length());
     }
   }
   

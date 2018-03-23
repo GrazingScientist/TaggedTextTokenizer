@@ -1,14 +1,12 @@
-<!--
-  -->
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.unifrankfurt.taggedtexttokenizer</groupId>
   <artifactId>tagged-text-tokenizer</artifactId>
-  <version>0.1</version>
+  <version>0.2</version>
 
   <properties>
-        <lucene-version>7.2.0</lucene-version>
-    </properties>
+      <lucene-version>7.2.0</lucene-version>
+  </properties>
 
 <dependencies>
 
@@ -17,6 +15,14 @@
     <groupId>commons-lang</groupId>
     <artifactId>commons-lang</artifactId>
     <version>2.6</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-test-framework -->
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-test-framework</artifactId>
+    <version>${lucene-version}</version>
+    <scope>test</scope>
 </dependency>
 
 <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
@@ -33,13 +39,32 @@
     <version>${lucene-version}</version>
 </dependency>
 
-<!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-test-framework -->
-<dependency>
-    <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-test-framework</artifactId>
-    <version>${lucene-version}</version>
-    <scope>test</scope>
-</dependency>
 </dependencies>
+
+  <build>
+      <plugins>
+          
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.7.0</version>
+              <configuration>
+                  <source>1.8</source>
+                  <target>1.8</target>
+              </configuration>
+          </plugin>
+         
+          <plugin>
+              <groupId>org.apache.maven.plugin</groupId>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <version>2.21.0</version>
+              <configuration>i
+                  <additionalClasspathElements>
+                       <additionalClasspathElement>${project.basedir}/target</additionalClasspathElement>
+                  </additionalClasspathElements>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
 
 </project>

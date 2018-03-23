@@ -26,9 +26,10 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
   String missingAttributeXmlString = "The tree <species uri='720243'><genus uri='fag394'>Fagus"
       + "</genus> <taxon uri=''>sylvatica</taxon></species> could not be found in <location "
       + "uri=''>London</location>, but in <location uri='loc7g68'>Frankfurt</location>.";
+    
   
-  /** Test StandardTokenizerFactory. */
-  public void testStandardTokenizer() throws Exception {
+  /** Test TaggedTextTokenizer */
+  public void testTaggedTextTokenizer() throws Exception {
     Tokenizer stream = getTaggedTextTokenizer(simpleXmlString, false);
     
     assertTokenStreamContents(stream,

@@ -34,8 +34,10 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory {
     
     String[] attributes = new String[1];
     attributes[0] = "uri";
-    this.searchedAttributes.put("species", attributes);
-    this.searchedAttributes.put("genus", attributes);
+    String[] array1 = {"taxon-name-part-type", "reg"};
+    String[] array2 = {"ext-link-type", "xlink:href"};
+    this.searchedAttributes.put("tp:taxon-name-part", array1);
+    this.searchedAttributes.put("ext-link", array2);
     this.searchedAttributes.put("taxon", attributes);
     this.searchedAttributes.put("location", attributes);
     

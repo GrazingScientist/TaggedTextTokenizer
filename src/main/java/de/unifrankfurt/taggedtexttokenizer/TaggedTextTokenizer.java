@@ -22,6 +22,7 @@ import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
 public final class TaggedTextTokenizer extends Tokenizer {
 
   public static final String TYPE_URI = "URI";
+  private static final boolean DEBUGGING = false;
 
   /* The attributes of the currently processed token */
   // The text of the token
@@ -108,14 +109,18 @@ public final class TaggedTextTokenizer extends Tokenizer {
       }
     }
     
-    for (BufferedOutputToken token : outputList) {
-      System.out.println(token.term + " start: " + token.startNode + " / end: " + token.endNode);
+    // Debugging output
+    if (DEBUGGING) {
+      for (BufferedOutputToken token : outputList) {
+        System.out.println(token.term + " start: " + token.startNode + " / end: " + token.endNode);
+      }
     }
     
     return outputList;
   }
 
   @Override
+  /** Go over the given text stream and parse the next token in the stream. */
   public boolean incrementToken() throws IOException {
     clearAttributes();
     
