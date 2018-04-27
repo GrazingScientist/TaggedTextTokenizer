@@ -4,62 +4,40 @@
 
 package de.unifrankfurt.taggedtexttokenizer;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
 import de.unifrankfurt.taggedtexttokenizer.TaggedTextTokenizer;
-import java.io.BufferedReader;
-import java.io.FileReader;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.lucene.analysis.TokenStream;
+
 import org.apache.lucene.analysis.util.ResourceLoader;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
 
-public class TaggedTextTokenizerFactory extends TokenizerFactory {
-  //private final String tokenizerFactory;
-  //private final String analyzerName;
-  //private final Map<String, String> tokArgs = new HashMap<String, String>();
-  //private final String searchedAttributesFiles;
+public class TaggedTextTokenizerFactory extends TokenizerFactory implements ResourceLoaderAware {
+
+  private static final String SEARCH_ATTRIBUTES_FILE = "searchAttributesFile";
   
+  private final String searchedAttributesFiles;
   private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>();
   
   public TaggedTextTokenizerFactory(Map<String, String> args) {
     super(args);
     
-    String[] attributes = new String[1];
-    attributes[0] = "uri";
-    String[] array1 = {"taxon-name-part-type", "reg"};
-    String[] array2 = {"ext-link-type", "xlink:href"};
-    this.searchedAttributes.put("tp:taxon-name-part", array1);
-    this.searchedAttributes.put("ext-link", array2);
-    this.searchedAttributes.put("taxon", attributes);
-    this.searchedAttributes.put("location", attributes);
-    
-    //searchedAttributesFiles = require(args, "searchedAttributes");
-    
-    //analyzerName = get(args, "analyzer");
-    //tokenizerFactory = get(args, "tokenizerFactory");
-    
-    /*if (analyzerName != null && tokenizerFactory != null) {
-      throw new IllegalArgumentException("Analyzer and TokenizerFactory cannot be specified both: "+
-                                          analyzerName + " and " + tokenizerFactory);
-    }
-    
-    if (tokenizerFactory != null) {
-      tokArgs.put("luceneMatchVersion", getLuceneMatchVersion().toString());
-      for (Iterator<String> itr = args.keySet().iterator(); itr.hasNext();) {
-        String key = itr.next();
-        tokArgs.put(key.replaceAll("^tokenizerFactory\\.", ""), args.get(key));
-        itr.remove();
-      }
-    }*/
-    
+    this.searchedAttributesFiles = args.remove(SEARCH_ATTRIBUTES_FILE);
+
     if (!args.isEmpty()) {
       throw new IllegalArgumentException("Unknown parameters: " + args);
     }
@@ -70,41 +48,18 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory {
     return new TaggedTextTokenizer(factory, searchedAttributes);
   }
   
-  /*@Override
+  @Override
   public void inform(ResourceLoader loader) throws IOException {
-    searchedAttributes = loadAttributes();
-  }
+    if (searchedAttributesFiles != null) {
+      try (InputStream stream = loader.openResource(searchedAttributesFiles)) {
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT);
 
-  private HashMap<String, String[]> loadAttributes() throws IOException {
-    HashMap<String, String[]> outputMap = new HashMap<String, String[]>();
-    
-    List<String> files = splitFileNames(searchedAttributesFiles);
-    for (String file : files) {
-      outputMap.putAll(parseAttributes(file));
+        JsonElement element = new JsonParser().parse(new InputStreamReader(stream, decoder));
+        Type type = new TypeToken<HashMap<String, String[]>>(){}.getType();
+        this.searchedAttributes = new Gson().fromJson(element, type);
+      }
     }
-    
-    return outputMap;
   }
-  
-  private HashMap<String, String[]> parseAttributes(String attributeFile) throws IOException {
-    try {
-      BufferedReader reader = new BufferedReader(new FileReader(attributeFile));
-    } catch (IOException e) {
-      throw new IOException("Error parsing attribute file:", e);
-    }
-    
-    HashMap<String, String[]> outputMap = new HashMap<String, String[]>();
-    
-    while (reader.ready()) {
-      String line = reader.readLine();
-      
-      String[] lineArray = line.split(",");
-      String tag = lineArray[0];
-      lineArray = (String[]) ArrayUtils.removeElement(lineArray, tag);
-      
-      outputMap.put(tag, lineArray);
-    }
-    
-    return outputMap;
-  }*/
 }

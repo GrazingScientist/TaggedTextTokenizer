@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.lucene.analysis.util;
 
+package org.apache.lucene.analysis.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -40,16 +40,18 @@ import org.apache.lucene.util.Version;
 // TODO: this has to be here, since the abstract factories are not in lucene-core,
 // so test-framework doesnt know about them...
 // this also means we currently cannot use this in other analysis modules :(
-// TODO: maybe after we improve the abstract factory/SPI apis, they can sit in core and resolve this.
+// TODO: maybe after we improve the abstract factory/SPI apis, they can sit in core and resolve 
+// this.
 public abstract class BaseTokenStreamFactoryTestCase extends BaseTokenStreamTestCase {
   
-  private AbstractAnalysisFactory analysisFactory(Class<? extends AbstractAnalysisFactory> clazz, Version matchVersion, ResourceLoader loader, String... keysAndValues) throws Exception {
+  private AbstractAnalysisFactory analysisFactory(Class<? extends AbstractAnalysisFactory> clazz, 
+      Version matchVersion, ResourceLoader loader, String... keysAndValues) throws Exception {
     if (keysAndValues.length % 2 == 1) {
       throw new IllegalArgumentException("invalid keysAndValues map");
     }
     Map<String,String> args = new HashMap<>();
     for (int i = 0; i < keysAndValues.length; i += 2) {
-      String previous = args.put(keysAndValues[i], keysAndValues[i+1]);
+      String previous = args.put(keysAndValues[i], keysAndValues[i + 1]);
       assertNull("duplicate values for key: " + keysAndValues[i], previous);
     }
     if (matchVersion != null) {

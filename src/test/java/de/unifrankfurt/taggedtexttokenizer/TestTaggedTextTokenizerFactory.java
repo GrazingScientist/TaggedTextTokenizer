@@ -4,14 +4,14 @@
 
 package de.unifrankfurt.taggedtexttokenizer;
 
+import de.unifrankfurt.taggedtexttokenizer.TaggedTextTokenizerFactory;
+
 import java.io.Reader;
 import java.io.StringReader;
-
-import org.apache.lucene.analysis.TokenStream;
+import java.util.HashMap;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.ja.StringMockResourceLoader;
 import org.apache.lucene.analysis.util.BaseTokenStreamFactoryTestCase;
-
-import de.unifrankfurt.taggedtexttokenizer.TaggedTextTokenizerFactory;
 
 public class TestTaggedTextTokenizerFactory extends BaseTokenStreamFactoryTestCase {
   
@@ -30,11 +30,38 @@ public class TestTaggedTextTokenizerFactory extends BaseTokenStreamFactoryTestCa
       + "</tp:taxon-name-part><tp:taxon-name-part taxon-name-part-type=\"species\" reg=\"nodanotherwon\">"
       + "nodanotherwon</tp:taxon-name-part></tp:taxon-name></italic> Ratcliffe. ";
     
-  /** Test TaggedTextTokenizerFactory */
+  String searchAttributes = "{"
+      + "  \"tp:taxon-name-part\": ["
+      + "    \"taxon-name-part-type\","
+      + "    \"reg\""
+      + "  ],"
+      + "  \"ext-link\": ["
+      + "      \"ext-link-type\","
+      + "      \"xlink:href\""
+      + "  ],"
+      + "  \"taxon\": ["
+      + "    \"uri\""
+      + "  ],"
+      + "  \"location\": ["
+      + "    \"uri\""
+      + "  ]"
+      + "}";
+  
+  /** Test TaggedTextTokenizerFactory. */
   public void testTaggedTextTokenizerFactory() throws Exception {
+    
     Reader reader = new StringReader(complexXmlString);
-    Tokenizer stream = tokenizerFactory("TaggedText").create(newAttributeFactory());
+    
+    HashMap<String, String> args = new HashMap<String, String>();
+    // It's a trap! Only necessary to fulfill an IF-clause.
+    args.put("searchAttributesFile", "test_attributes.json");
+
+    TaggedTextTokenizerFactory factory = new TaggedTextTokenizerFactory(args);
+    factory.inform(new StringMockResourceLoader(searchAttributes));
+    
+    Tokenizer stream = factory.create(newAttributeFactory());
     stream.setReader(reader);
+    
     assertTokenStreamContents(stream,
         new String[]{"For", "example", "the", "Costa", "Rican", "genus", "Cyclocephala", "C", "species", "unamas", "unamas", 
                      "Ratcliffe", "Spanish", "una", "mas", "was", "named", "after", "the", "overwhelming", "feeling", "one", "gets",

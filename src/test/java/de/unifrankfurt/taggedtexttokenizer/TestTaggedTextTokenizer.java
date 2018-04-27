@@ -28,7 +28,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
       + "uri=''>London</location>, but in <location uri='loc7g68'>Frankfurt</location>.";
     
   
-  /** Test TaggedTextTokenizer */
+  /** Test TaggedTextTokenizer. */
   public void testTaggedTextTokenizer() throws Exception {
     Tokenizer stream = getTaggedTextTokenizer(simpleXmlString, false);
     
