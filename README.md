@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/GrazingScientist/TaggedTextTokenizer.svg?branch=master)](https://travis-ci.org/GrazingScientist/TaggedTextTokenizer)
+
 # TaggedTextTokenizer
 -- Under Development --
 
