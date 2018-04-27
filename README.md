@@ -1,7 +1,7 @@
 # TaggedTextTokenizer
 -- Under Development --
 
-The TaggedTextTokenizer was invented to improve the search results in Apache Lucene, by indexing XML files that contain semantic information of the tagged words. While the SynonymGraphFilter may be applicable in some cases to improve the search result, it will not work with ambiguous words (for example, try SynonymGraphFilter with the word 'break' ;) ). When you have tagged words and their respective attributes-value pairs of an XML, you can be precise for the meaning of every single word.
+The TaggedTextTokenizer was invented to improve the search results in Apache Lucene, by indexing XML files that contain semantic information of the tagged words. While the SynonymGraphFilter may be applicable in some cases to improve the search result, it will not work with ambiguous words (for example, try SynonymGraphFilter with the word 'break' ;) ). When you have tagged words and their respective attribute-value pairs in an XML, you can be precise for the meaning of every single word.
 
 The TaggedTextTokenizer is able to index text like this:
 
@@ -32,14 +32,30 @@ diagnoses and a key to world genera of <tp:taxon-name><tp:taxon-name-part taxon-
 ```
 (quoted from Moore et al., 2018)
 
-Given the configuration, the Tokenizer works a little like the SynonymGraphFilter in Apache Lucene. The XML text is read and the tagged words are given to the index. And that would be it, given a simple configuration that you only want to index
+The Tokenizer works a little like the SynonymGraphFilter in Apache Lucene. The XML text is read and at least all words of the plain text are given to the index. And that would be it, given a simple configuration that you only want to index
 the plain text.
 
-However, if the tokenizer also indexes the attributes of the respective word FOR THE SAME POSITION as the tagged word. For example:
+However, given a configuration file, the tokenizer also indexes the attributes of the respective word FOR THE SAME POSITION as the tagged word. For example:
 
 `<tp:taxon-name-part taxon-name-part-type="order">Coleoptera</tp:taxon-name-part></tp:taxon-name>`
 
-The word 'Coleoptera' starts at the character position 41 (if I counted correctly) and ends at character position 51. Lucene remembers the position of the single words. Now, the value 'order' of the given attribute 'taxon-name-part-type' is also indexed (if configured) for the start position 41 and the end position 51. So, when you search in your index for 'order' the index will hand you back 'Coleoptera' at this exact position.
+In the above given text, the word 'Coleoptera' starts at the character position 41 (if I counted correctly) and ends at character position 51. Lucene remembers the position of single words. Now, the value 'order' of the given attribute 'taxon-name-part-type' is also indexed (if configured) for the start position 41 and the end position 51, because this attribute is tagged to the word 'Coleoptera'. So, when you search in your index for 'order' the index will hand you back 'Coleoptera' at this exact position.
+
+## Installation
+You have to compile a JAR-file from the source code by using [Apache Maven](https://maven.apache.org/).
+
+To compile the whole code, just type:
+
+`mvn package`
+
+When run successfully, this will create a .jar file in the **target** folder. This .jar file you may put into the **server/lib** folder, if you like (but any other folder is appropriate too). Additionally, you have to give the path (either the path to the folder or the exact path) to the .jar file. This you can do in the **server/solr/[your core name]/conf/solrconfig.xml**.
+
+... Further explanaitions will follow soon ...
+
+For running only the tests (there are not so many yet):
+
+`mvn test`
+
 
 ## References
 
