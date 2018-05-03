@@ -27,13 +27,17 @@ public final class TaggedTextTokenizer extends Tokenizer {
   /* The attributes of the currently processed token */
   // The text of the token
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class); 
+  
   // Position of the token relative to the previous token
   private final PositionIncrementAttribute posIncrAtt = 
       addAttribute(PositionIncrementAttribute.class);
+  
   // Length of the token (i.e. number of characters)
   private final PositionLengthAttribute posLenAtt = addAttribute(PositionLengthAttribute.class);
-  // The standard type of a token is "word". Would be replaced by "URI" if it was a uri (suprise!).
+  
+  // The standard type of a token is "word". Would be replaced by "URI" if it was a URI (surprise!).
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+  
   // Gives the start and end position of the token
   private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
 
@@ -78,7 +82,8 @@ public final class TaggedTextTokenizer extends Tokenizer {
   /** Creates a new TaggedTextTokenizer with a given 
    * {@link org.apache.lucene.util.AttributeFactory}.
    */
-  public TaggedTextTokenizer(AttributeFactory factory, HashMap<String, String[]> searchedAttributes) {
+  public TaggedTextTokenizer(AttributeFactory factory, HashMap<String, 
+                             String[]> searchedAttributes) {
     super(factory);
     this.searchedAttributes.putAll(searchedAttributes);
     init();
@@ -150,7 +155,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
       return true;
     }
     
-    return false;
+    return true;
   }
   
   /** Takes a BufferedOutputTag created from the TaggedTextTokenizerImpl and

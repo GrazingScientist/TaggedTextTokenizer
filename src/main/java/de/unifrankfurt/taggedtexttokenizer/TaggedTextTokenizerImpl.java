@@ -4,6 +4,8 @@
 
 package de.unifrankfurt.taggedtexttokenizer;
 
+import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Comparator;
@@ -15,8 +17,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
 
 /**
  * The code is partially (especially the basic input pattern) copied from the ClassicTokenizerImpl. 
@@ -48,8 +48,9 @@ public class TaggedTextTokenizerImpl {
   private static boolean DEBUGGING = false;
   private static boolean XML_READER_NAMESPACE_AWARE = false;
   private static final String DUMMY_ROOT = "doc";
-  private static final String SPECIAL_CHARACTERS_REGEX = "[\\p{Punct}]";
-  private static final String NON_SPECIAL_CHARACTERS_REGEX = "[^\\p{Punct}]";
+  private static final String SPECIAL_CHARACTERS = "[\\p{Punct}]";
+  private static final String ALPHANUMERIC_CHARACTERS = "[\\p{Alnum}]";
+  private static final String WHITESPACES = "\\p{Space}";
   
   /** Constructor for the TaggedTextTokenizerImpl. */
   public TaggedTextTokenizerImpl() {
@@ -152,7 +153,7 @@ public class TaggedTextTokenizerImpl {
     xmlStreamReader.close();
   }
   
-  /** Store all attributes of a given opened tag. 
+  /** Store all demanded attributes of a given opened tag. 
    * @throws IOException If there are attributes with an empty value. */
   private void addAttributesToTag(BufferedOutputTag openTag) throws IOException {  
     // Get the tag's name
@@ -168,7 +169,7 @@ public class TaggedTextTokenizerImpl {
         if (attValue != null) {
           
           // If the attribute value is empty, throw an exception
-          // If you waste bytes with empty values you deserve an exception.
+          // If you waste bytes with empty values, you deserve an exception.
           if (attValue.isEmpty()) {
             throw new IOException("The tag '" + tag + "' at position " + getCurrentTextOffset()
                                   + "misses the value for attribute " + attName);
@@ -211,20 +212,12 @@ public class TaggedTextTokenizerImpl {
    * create a new BufferedOutputTag for every token. */
   private void addTextTokensToOutputListSuccessively(String text) {
     // For every token...
-    for (String token : text.split(" ")) {
+    for (String token : text.split(WHITESPACES)) {
       
-      // Seperate the token from the special characters
+      // Separate the token from the special characters
       // Be aware that the regex searches the characters that should NOT be included,
       // since here applies a replace-function
-      String alphaNumericOnly = token.replaceAll(SPECIAL_CHARACTERS_REGEX, "");
-      String specialCharactersOnly = token.replaceAll(NON_SPECIAL_CHARACTERS_REGEX, "");
-      
-      // Also seperate the special characters coming before and after the token
-      String specialCharactersBeforeToken = token.replaceAll(NON_SPECIAL_CHARACTERS_REGEX + "+.*$", "");
-      String specialCharactersAfterToken = token.replaceAll("^.*?" + NON_SPECIAL_CHARACTERS_REGEX + "+", "");
-      
-      //System.out.println("Before: \"" + specialCharactersBeforeToken + "\"");
-      //System.out.println("After: \"" + specialCharactersAfterToken + "\"");
+      String alphaNumericOnly = token.replaceAll(SPECIAL_CHARACTERS, "");
       
       // Jump over (multiple) special characters and only increment the offset
       if (alphaNumericOnly.isEmpty()) {
@@ -233,8 +226,11 @@ public class TaggedTextTokenizerImpl {
       }
       
       if (DEBUGGING) {
-        System.out.println("Creating single node with text : " + alphaNumericOnly);
+        System.out.println("Creating single node with text : \"" + alphaNumericOnly + "\"");
       }
+      
+      // Also separate the special characters coming before the token
+      String specialCharactersBeforeToken = token.replaceAll(ALPHANUMERIC_CHARACTERS + ".*", "");
       
       // Increase the offset counter, if there are special characters in front of the token
       incrementTextOffset(specialCharactersBeforeToken);
@@ -248,8 +244,18 @@ public class TaggedTextTokenizerImpl {
       // Store the BufferedOutputTag directly in the output list
       outputList.add(tag);
       
+      // Also separate the special characters coming before the token
+      String specialCharactersAfterToken = token.replaceAll(".*" 
+          + ALPHANUMERIC_CHARACTERS + "+?", "");
+      
+      if (DEBUGGING) {
+        System.out.println("Token: " + token);
+        System.out.println("Special Characters BEFORE Token: " + specialCharactersBeforeToken);
+        System.out.println("Special Characters AFTER Token: " + specialCharactersAfterToken);
+      }
+      
       // Increment the offset counter by 1 to set it to the next token's starting position
-      incrementTextOffset(1 + specialCharactersAfterToken.length());
+      incrementTextOffset(specialCharactersAfterToken.length() + 1);
     }
   }
   
@@ -267,10 +273,6 @@ public class TaggedTextTokenizerImpl {
       // Throw an exception, if there is an inconsistency.
       openTagList.remove(openTag);
       outputList.add(openTag);
-      
-      if (false) {
-        throw new XMLStreamException("Error while closing tag " + xmlStreamReader.getLocalName());
-      }
     }
   }
   
@@ -293,7 +295,7 @@ public class TaggedTextTokenizerImpl {
   private void sortOutputListByStartingPosition() {
     outputList.sort(new StartingPositionComparator());
   }
-  
+
   /** Sorts the given BufferedOutputTags <br>
     *  1.) by starting position<br>
     *  2.) by type ("URI" before "word") */

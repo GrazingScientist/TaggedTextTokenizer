@@ -26,6 +26,7 @@ import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
 
+/** The factory class for the TaggedTextTokenizer.*/
 public class TaggedTextTokenizerFactory extends TokenizerFactory implements ResourceLoaderAware {
 
   private static final String SEARCH_ATTRIBUTES_FILE = "searchAttributesFile";
@@ -33,9 +34,10 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
   private final String searchedAttributesFiles;
   private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>();
   
+  /** Constructor. */
   public TaggedTextTokenizerFactory(Map<String, String> args) {
     super(args);
-    
+
     this.searchedAttributesFiles = args.remove(SEARCH_ATTRIBUTES_FILE);
 
     if (!args.isEmpty()) {
@@ -43,11 +45,13 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
     }
   }
   
+  /** Create a TaggedTextTokenizer and return it. */
   @Override
   public TaggedTextTokenizer create(AttributeFactory factory) {
     return new TaggedTextTokenizer(factory, searchedAttributes);
   }
   
+  /** Loading of external files. */
   @Override
   public void inform(ResourceLoader loader) throws IOException {
     if (searchedAttributesFiles != null) {
