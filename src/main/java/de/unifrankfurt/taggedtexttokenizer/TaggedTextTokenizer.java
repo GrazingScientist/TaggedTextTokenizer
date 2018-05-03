@@ -155,7 +155,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
       return true;
     }
     
-    return true;
+    return false;
   }
   
   /** Takes a BufferedOutputTag created from the TaggedTextTokenizerImpl and

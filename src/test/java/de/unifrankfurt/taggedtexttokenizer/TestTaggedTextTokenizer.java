@@ -19,14 +19,25 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
       + "<taxon uri='spec9574'>sylvatica</taxon></species> could not be found in <location "
       + "uri='loc67567'>London</location>, but in <location uri='loc7g68'>Frankfurt</location>."
       + "</doc>";
+  
+  String simpleXmlStringWithSpecialCharacters = "The tree* <species uri='720243'><genus uri='fag394'>&amp;Fagus</genus> "
+      + "<taxon uri='spec9574'>sylvatica</taxon></species> ^#could^$ not be found in <location "
+      + "uri='loc67567'>London</location>, but in <location uri='loc7g68'>Frankfurt</location>.$";
+  
   String incompleteSimpleXmlString = "The tree <species uri='720243'><genus uri='fag394'>Fagus"
       + "</genus> <taxon uri='spec9574'>sylvatica</taxon></species> could not be found in "
       + "<location uri='loc67567'>London</location>, but in <location uri='loc7g68'>Frankfurt"
       + "</location>.";
+  
   String missingAttributeXmlString = "The tree <species uri='720243'><genus uri='fag394'>Fagus"
       + "</genus> <taxon uri=''>sylvatica</taxon></species> could not be found in <location "
       + "uri=''>London</location>, but in <location uri='loc7g68'>Frankfurt</location>.";
-    
+  
+  String simpleXmlStringWithWhitespaces = "<doc>The tree   <species uri='720243'>"
+      + "<genus uri='fag394'>"
+      + "Fagus</genus><taxon uri='spec9574'>sylvatica</taxon></species> could    not be "
+      + "found in <location uri='loc67567'>London</location>, but    in    <location "
+      + "uri='loc7g68'>Frankfurt</location>.   </doc>";
   
   /** Test TaggedTextTokenizer. */
   public void testTaggedTextTokenizer() throws Exception {
@@ -39,7 +50,32 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
         new int[] {3, 8, 14, 24, 30, 34, 37, 43, 46, 53, 58, 61, 71} // end offset
     );
   }
+  
+  /** Test the removing of multiple white spaces within the text. */
+  public void testRemovingEmptyWords() throws Exception {
+    Tokenizer stream = getTaggedTextTokenizer(simpleXmlStringWithWhitespaces, false);
+    
+    assertTokenStreamContents(stream,
+        new String[]{"The", "tree", "Fagus", "sylvatica", "could", "not", "be", "found", "in",
+                     "London", "but", "in", "Frankfurt"},
+        new int[] {0, 4, 9, 15, 25, 31, 35, 38, 44, 47, 55, 59, 62}, //start offset
+        new int[] {3, 8, 14, 24, 30, 34, 37, 43, 46, 53, 58, 61, 71} // end offset
 
+    );
+  }
+  
+  /** Test the ignoring special characters. */
+  public void testRemovingSpecialCharacters() throws Exception {
+    Tokenizer stream = getTaggedTextTokenizer(simpleXmlStringWithSpecialCharacters, false);
+    
+    assertTokenStreamContents(stream,
+        new String[]{"The", "tree", "Fagus", "sylvatica", "could", "not", "be", "found", "in",
+                     "London", "but", "in", "Frankfurt"},
+        new int[] {0, 4, 11, 17, 29, 37, 41, 44, 50, 53, 61, 65, 68}, //start offset
+        new int[] {3, 8, 16, 26, 34, 40, 43, 49, 52, 59, 64, 67, 77} // end offset
+    );
+  }
+ 
   /** Test the insertion of attributes into the token stream. */
   public void testAttributeInserting() throws Exception {
     Tokenizer stream = getTaggedTextTokenizer(simpleXmlString, true);
