@@ -44,15 +44,41 @@ However, given a configuration file, the tokenizer also indexes the attributes o
 In the above given text, the word 'Coleoptera' starts at the character position 41 (if I counted correctly) and ends at character position 51. Lucene remembers the position of single words. Now, the value 'order' of the given attribute 'taxon-name-part-type' is also indexed (if configured) for the start position 41 and the end position 51, because this attribute is tagged to the word 'Coleoptera'. So, when you search in your index for 'order' the index will hand you back 'Coleoptera' at this exact position.
 
 ## Installation
-You have to compile a JAR-file from the source code by using [Apache Maven](https://maven.apache.org/).
+You have to compile a .jar file from the source code by using [Apache Maven](https://maven.apache.org/).
 
-To compile the whole code, just type:
+To compile the whole code, just type (when in the repository folder):
 
 `mvn package`
 
-When run successfully, this will create a .jar file in the **target** folder. This .jar file you may put into the **server/lib** folder, if you like (but any other folder is appropriate too). Additionally, you have to give the path (either the path to the folder or the exact path) to the .jar file. This you can do in the **server/solr/[your core name]/conf/solrconfig.xml**.
+When run successfully, this will create a .jar file in the **target** folder. This .jar file you may put into a **solr-7.X.X/lib** folder (that you have to create), if you like (but any other folder is appropriate too). 
 
-... Further explanaitions will follow soon ...
+Additionally, you have to give the path (either the path to the folder or the exact path) to the .jar file. This you can do in the **server/solr/[your core name]/conf/solrconfig.xml**. In this file, you should find entries looking like this:
+
+`<lib dir="${solr.install.dir:../../../..}/contrib/extraction/lib" regex=".*\.jar" />`
+
+Somewhere close to these entries, you may type (if following the above given example):
+
+`<lib dir="${solr.install.dir:../../../..}/lib" regex=".*\.jar" />`, when you want to add the whole folder, or
+
+`<lib path="/home/me/solr-X.X.X/lib/tagged-text-tokenizer-X.X.jar" />`, for reading only this .jar specifically, where X.X is the version number (please note the differing syntax to above statement).
+
+Additionally, you have to give a process sequence to Solr for your document. Hence, you need to modify **server/solr/[your core name]/conf/managed-schema** to include:
+
+`<fieldType name="tagged_text" class="solr.TextField">  
+<analyzer>  
+<tokenizer class="de.unifrankfurt.taggedtexttokenizer.TaggedTextTokenizerFactory" />
+    </analyzer>
+ </fieldType>`
+ 
+ You can also add any filter after the tokenizer, which you like.
+ 
+ In your input document, you have to name all fields that need to be included with this process line as
+ 
+ `<field name="tagged_text" class="solr.TextField" />`.
+ 
+ For more details on how to configure your input file, please see [the official documentation](https://lucene.apache.org/solr/guide/7_3/uploading-data-with-index-handlers.html).
+ 
+ Finally, reload your core in the Solr Administration Menu and index your file.
 
 For running only the tests (there are not so many yet):
 
