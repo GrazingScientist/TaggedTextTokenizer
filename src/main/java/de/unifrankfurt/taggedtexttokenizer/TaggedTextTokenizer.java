@@ -129,13 +129,16 @@ public final class TaggedTextTokenizer extends Tokenizer {
   public boolean incrementToken() throws IOException {
     clearAttributes();
     
+    // Parse the whole XML in one go...
     if (!isParsed) {
       scanner.setSearchedAttributes(searchedAttributes);
       LinkedList<BufferedOutputTag> outputList = scanner.parse();
       bufferedOutputTokens = insertAttributesInPosition(outputList);
       isParsed = true;
+
     }
     
+    // ... then return the tokens separately
     return setNextToken();
   }
   

@@ -15,7 +15,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
   
   HashMap<String, String[]> testSearchedAttributes = new HashMap<String, String[]>();
   
-  String simpleXmlString = "<doc>The tree <species uri='720243'><genus uri='fag394'>Fagus</genus> "
+  String simpleXmlString = "&lt;doc>The tree <species uri='720243'><genus uri='fag394'>Fagus</genus> "
       + "<taxon uri='spec9574'>sylvatica</taxon></species> could not be found in <location "
       + "uri='loc67567'>London</location>, but in <location uri='loc7g68'>Frankfurt</location>."
       + "</doc>";
@@ -65,7 +65,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
   }
   
   /** Test the ignoring special characters. */
-  public void testRemovingSpecialCharacters() throws Exception {
+  /*public void testRemovingSpecialCharacters() throws Exception {
     Tokenizer stream = getTaggedTextTokenizer(simpleXmlStringWithSpecialCharacters, false);
     
     assertTokenStreamContents(stream,
@@ -74,7 +74,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
         new int[] {0, 4, 11, 17, 29, 37, 41, 44, 50, 53, 61, 65, 68}, //start offset
         new int[] {3, 8, 16, 26, 34, 40, 43, 49, 52, 59, 64, 67, 77} // end offset
     );
-  }
+  }*/
  
   /** Test the insertion of attributes into the token stream. */
   public void testAttributeInserting() throws Exception {

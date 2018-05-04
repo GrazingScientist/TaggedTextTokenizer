@@ -17,6 +17,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import org.apache.commons.text.StringEscapeUtils;
+
 
 /**
  * The code is partially (especially the basic input pattern) copied from the ClassicTokenizerImpl. 
@@ -25,7 +27,7 @@ import javax.xml.stream.XMLStreamReader;
  * actual word!
  */
 public class TaggedTextTokenizerImpl {
-
+  
   /** The reader to store the given xml data. */
   private XMLStreamReader xmlStreamReader;
   
@@ -62,6 +64,7 @@ public class TaggedTextTokenizerImpl {
    * to know the whole text with all tags to process the XML. 
    * @throws IOException Thrown when no attributes are given in the input text. */
   public LinkedList<BufferedOutputTag> parse() throws IOException {
+
     try {
       // A cursor moves successively over the text and triggers at 'events'.
       // Here, an event is an opening tag, text character, or a closing tag.
@@ -120,6 +123,10 @@ public class TaggedTextTokenizerImpl {
     // Sort the list of tokens by their respective starting position.
     // If two tokens have the same starting position, URIs come first.
     sortOutputListByStartingPosition();
+    
+    if (outputList.isEmpty()) {
+      throw new IOException("Empty String!");
+    }
 
     return outputList;
   }
@@ -144,9 +151,11 @@ public class TaggedTextTokenizerImpl {
     bldr.insert(0, "<" + DUMMY_ROOT + ">");
     bldr.insert(bldr.length(), "</" + DUMMY_ROOT + ">");
     
+    String xmlText = StringEscapeUtils.unescapeHtml4(bldr.toString());
+    
     // Parse the text to the XML Reader
     this.xmlStreamReader =
-             xmlInputFactory.createXMLStreamReader(new StringReader(bldr.toString()));
+             xmlInputFactory.createXMLStreamReader(new StringReader(xmlText));
   }
   
   public void close() throws IOException, XMLStreamException {
@@ -210,7 +219,8 @@ public class TaggedTextTokenizerImpl {
   
   /** Split the given text by white spaces, remove any special character and 
    * create a new BufferedOutputTag for every token. */
-  private void addTextTokensToOutputListSuccessively(String text) {
+  private void addTextTokensToOutputListSuccessively(String text) throws IOException {
+    
     // For every token...
     for (String token : text.split(WHITESPACES)) {
       

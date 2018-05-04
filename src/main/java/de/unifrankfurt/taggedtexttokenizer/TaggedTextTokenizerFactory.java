@@ -54,7 +54,9 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
   /** Loading of external files. */
   @Override
   public void inform(ResourceLoader loader) throws IOException {
+    
     if (searchedAttributesFiles != null) {
+      //try (InputStream stream = loader.openResource(searchedAttributesFiles)) {
       try (InputStream stream = loader.openResource(searchedAttributesFiles)) {
         CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder()
             .onMalformedInput(CodingErrorAction.REPORT)
