@@ -14,6 +14,7 @@ import de.unifrankfurt.taggedtexttokenizer.TaggedTextTokenizer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
@@ -25,9 +26,13 @@ import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** The factory class for the TaggedTextTokenizer.*/
 public class TaggedTextTokenizerFactory extends TokenizerFactory implements ResourceLoaderAware {
+  
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String SEARCH_ATTRIBUTES_FILE = "searchAttributesFile";
   
@@ -56,7 +61,6 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
   public void inform(ResourceLoader loader) throws IOException {
     
     if (searchedAttributesFiles != null) {
-      //try (InputStream stream = loader.openResource(searchedAttributesFiles)) {
       try (InputStream stream = loader.openResource(searchedAttributesFiles)) {
         CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder()
             .onMalformedInput(CodingErrorAction.REPORT)

@@ -4,22 +4,28 @@
 
 package de.unifrankfurt.taggedtexttokenizer;
 
+import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
+
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import javax.xml.stream.XMLStreamException;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeFactory;
-import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public final class TaggedTextTokenizer extends Tokenizer {
+  
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static final String TYPE_URI = "URI";
   private static final boolean DEBUGGING = false;
@@ -49,6 +55,8 @@ public final class TaggedTextTokenizer extends Tokenizer {
       new LinkedList<BufferedOutputToken>();
   
   boolean isParsed;
+  
+  String typeOfPreviouslyStreamedToken = "word";
   
   static class BufferedOutputToken {
     final String term;
@@ -101,9 +109,13 @@ public final class TaggedTextTokenizer extends Tokenizer {
       LinkedList<BufferedOutputTag> inputList) {
     LinkedList<BufferedOutputToken> outputList = new LinkedList<BufferedOutputToken>();
     
+    log.debug("Inserting Attributes to Stream...");
+    
     Iterator<BufferedOutputTag> it = inputList.iterator();
     while (it.hasNext()) {
       BufferedOutputTag tag = it.next();
+      
+      log.debug(tag + " has attributes: " + tag.hasAttributes());
       
       if (tag.hasAttributes()) {
         for (String att : tag.attributes.keySet()) {
@@ -144,35 +156,56 @@ public final class TaggedTextTokenizer extends Tokenizer {
   
   /** Insert the next token in the buffer to the token stream.
    * Returns true as long as there are tokens in the buffer.  */
-  private boolean setNextToken() {
+  private boolean setNextToken() throws IOException {
     if (!bufferedOutputTokens.isEmpty()) {
       BufferedOutputToken token = bufferedOutputTokens.poll();
       
-      // Here the token attributes are filled into the stream
+      // Here the token attributes are filled into the stream.
+      
+      // The token itself (i.e. its string representation)
       termAtt.append(token.term);
-      posIncrAtt.setPositionIncrement(1);
-      posLenAtt.setPositionLength(token.term.length());
+      
+      // The position increment for words on the same position should be 0.
+      if (typeOfPreviouslyStreamedToken == TYPE_URI) {
+        posIncrAtt.setPositionIncrement(0);
+      } else {
+        posIncrAtt.setPositionIncrement(1);
+      }
+      
+      if (token.term.length() == 0) {
+        throw new IOException("Token with length 0!");
+      }
+      
+      // This attribute will be ignored by the indexing process, but still may
+      // be useful.
+      posLenAtt.setPositionLength(1);
+      
+      // The token type (if it is a "word" or a "URI")
       typeAtt.setType(token.type);
+      
+      // Start and end position of the token
       offsetAtt.setOffset(token.startNode, token.endNode);
       
+      typeOfPreviouslyStreamedToken = typeAtt.type();
+      
+      // Return true, to indicate that there is a token ready to be streamed.
       return true;
     }
     
+    // No token left to stream
     return false;
   }
   
   /** Takes a BufferedOutputTag created from the TaggedTextTokenizerImpl and
    * returns BufferedOutputToken.
    * TODO: Get rid of this function! No need to transfer between formats!
-   * @param tag
-   * @param term
-   * @param type
-   * @return
    */
   private BufferedOutputToken createNewBufferedOutputToken(BufferedOutputTag tag, 
                                                           String term, String type) {
     int startNode = tag.getStartNode();
     int endNode = tag.getEndNode();
+    
+    log.debug("Creating new OutputToken: " + term);
     
     return new BufferedOutputToken(type, term, startNode, endNode);
   }

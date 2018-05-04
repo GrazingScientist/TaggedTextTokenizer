@@ -91,7 +91,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
         new String[] {"word", "word", "URI", "URI", "word", "URI", "word", "word", "word", "word",
             "word", "word", "URI", "word", "word", "word", "URI", "word"},
         //posIncr
-        new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+        new int[] {1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0}
     );
   }
   
@@ -110,7 +110,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
         new String[] {"word", "word", "URI", "URI", "word", "URI", "word", "word", "word", "word",
             "word", "word", "URI", "word", "word", "word", "URI", "word"},
         //posIncr
-        new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+        new int[] {1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0}
     );
   }
   

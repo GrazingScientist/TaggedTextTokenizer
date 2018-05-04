@@ -8,6 +8,8 @@ import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +19,11 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
 import org.apache.commons.text.StringEscapeUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -27,6 +33,8 @@ import org.apache.commons.text.StringEscapeUtils;
  * actual word!
  */
 public class TaggedTextTokenizerImpl {
+  
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
   /** The reader to store the given xml data. */
   private XMLStreamReader xmlStreamReader;
@@ -56,6 +64,7 @@ public class TaggedTextTokenizerImpl {
   
   /** Constructor for the TaggedTextTokenizerImpl. */
   public TaggedTextTokenizerImpl() {
+
     // Configures if the XML Reader is sensitive for the given namespaces
     xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, XML_READER_NAMESPACE_AWARE);
   }
@@ -79,6 +88,8 @@ public class TaggedTextTokenizerImpl {
           // Found an opening tag
           case XMLStreamConstants.START_ELEMENT: {
             String tagName = xmlStreamReader.getLocalName();
+            log.debug("Current tag: " + tagName);
+            log.debug("Is tag demanded? " + isTagDemanded(tagName));
             if (tagName != DUMMY_ROOT && isTagDemanded(tagName)) {
               BufferedOutputTag newTag = createNewOpenTag(tagName);
               openTagList.add(newTag);
@@ -121,7 +132,7 @@ public class TaggedTextTokenizerImpl {
     }
     
     // Sort the list of tokens by their respective starting position.
-    // If two tokens have the same starting position, URIs come first.
+    // There are no URIs included yet.
     sortOutputListByStartingPosition();
     
     if (outputList.isEmpty()) {
@@ -170,10 +181,15 @@ public class TaggedTextTokenizerImpl {
       
     // Only if the tag is demanded
     if (isTagDemanded(tag)) {
+      log.debug("Searched Attributes of tag \"" + tag + "\" :" + searchedAttributes.get(tag));
+      
       // Get all demanded attributes of the processed tag and
       // read their value in the currently opened tag
       for (String attName : searchedAttributes.get(tag)) {
+        log.debug("Searching Attribute Name: " + attName);
         String attValue = xmlStreamReader.getAttributeValue("", attName);
+        
+        log.debug("Found: " + attValue);
         
         if (attValue != null) {
           
@@ -186,6 +202,8 @@ public class TaggedTextTokenizerImpl {
           
           // Add the attribute value to the tag
           openTag.addAttributes(attName, attValue);
+          log.debug("Added Attribute " + attName + " with the value " + attValue 
+              + " to " + tag);
           if (DEBUGGING) {
             System.out.println("Added Attribute " + attName + " with the value " + attValue 
                                + " to " + tag);
@@ -250,6 +268,8 @@ public class TaggedTextTokenizerImpl {
       tag.startNode = getCurrentTextOffset();
       tag.endNode = incrementTextOffset(alphaNumericOnly);
       tag.addText(alphaNumericOnly);
+      
+      log.debug("Add token: \"" + alphaNumericOnly + "\"");
       
       // Store the BufferedOutputTag directly in the output list
       outputList.add(tag);
