@@ -165,7 +165,7 @@ public class TaggedTextTokenizerImpl {
     
     //String xmlText = StringEscapeUtils.escapeHtml4(bldr.toString());
     String xmlText = bldr.toString();
-    xmlText = xmlText.replaceAll("&", "&amp;");
+    xmlText = xmlText.replaceAll(" & ", " &amp; ");
     
     // Parse the text to the XML Reader
     this.xmlStreamReader =
@@ -376,5 +376,11 @@ public class TaggedTextTokenizerImpl {
   
   private int getCurrentTextOffset() {
     return this.currentTextOffset;
+  }
+  
+  public void reset() {
+    this.openTagList.clear();
+    this.outputList.clear();
+    this.currentTextOffset = 0;
   }
 }

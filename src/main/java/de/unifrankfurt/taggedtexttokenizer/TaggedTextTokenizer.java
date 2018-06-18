@@ -54,7 +54,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
   private LinkedList<BufferedOutputToken> bufferedOutputTokens = 
       new LinkedList<BufferedOutputToken>();
   
-  boolean isParsed;
+  private boolean isParsed;
   
   String typeOfPreviouslyStreamedToken = "word";
   
@@ -149,7 +149,6 @@ public final class TaggedTextTokenizer extends Tokenizer {
       LinkedList<BufferedOutputTag> outputList = scanner.parse();
       bufferedOutputTokens = insertAttributesInPosition(outputList);
       isParsed = true;
-
     }
     
     // ... then return the tokens separately
@@ -219,7 +218,10 @@ public final class TaggedTextTokenizer extends Tokenizer {
     
     try {
       // Reset the XML-reading instance
+      scanner.reset();
       scanner.setup(this.input);
+      
+      this.isParsed = false;
     } catch (XMLStreamException e) {
       // Has to rethrow the IOException, since otherwise there
       // is no override
