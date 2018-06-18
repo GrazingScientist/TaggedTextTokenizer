@@ -55,7 +55,7 @@ public class TaggedTextTokenizerImpl {
   private int currentTextOffset;
 
   // Constants
-  private static boolean DEBUGGING = false;
+  private static boolean DEBUGGING = true;
   private static boolean XML_READER_NAMESPACE_AWARE = false;
   private static final String DUMMY_ROOT = "doc";
   private static final String SPECIAL_CHARACTERS = "[\\p{Punct}]";
@@ -67,6 +67,7 @@ public class TaggedTextTokenizerImpl {
 
     // Configures if the XML Reader is sensitive for the given namespaces
     xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, XML_READER_NAMESPACE_AWARE);
+    //xmlInputFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
   }
   
   /** Parse the text to into the xml reader. This is all done in one go, because we need
@@ -162,7 +163,8 @@ public class TaggedTextTokenizerImpl {
     bldr.insert(0, "<" + DUMMY_ROOT + ">");
     bldr.insert(bldr.length(), "</" + DUMMY_ROOT + ">");
     
-    String xmlText = StringEscapeUtils.unescapeHtml4(bldr.toString());
+    //String xmlText = StringEscapeUtils.escapeHtml4(bldr.toString());
+    String xmlText = bldr.toString();
     
     // Parse the text to the XML Reader
     this.xmlStreamReader =

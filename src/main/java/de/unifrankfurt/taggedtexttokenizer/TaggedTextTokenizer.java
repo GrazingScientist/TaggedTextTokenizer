@@ -77,6 +77,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
    * @param searchedAttributes HashMap with the key:value = tag:[attributes]
    */
   public TaggedTextTokenizer(HashMap<String, String[]> searchedAttributes) {
+    super();
     init();
     if (searchedAttributes != null) {
       this.searchedAttributes.putAll(searchedAttributes);
@@ -84,6 +85,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
   }
   
   public TaggedTextTokenizer() {
+    super();
     init();
   }
   
@@ -178,7 +180,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
       
       // This attribute will be ignored by the indexing process, but still may
       // be useful.
-      posLenAtt.setPositionLength(1);
+      posLenAtt.setPositionLength(token.term.length());
       
       // The token type (if it is a "word" or a "URI")
       typeAtt.setType(token.type);
