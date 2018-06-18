@@ -165,6 +165,7 @@ public class TaggedTextTokenizerImpl {
     
     //String xmlText = StringEscapeUtils.escapeHtml4(bldr.toString());
     String xmlText = bldr.toString();
+    xmlText = xmlText.replaceAll("&", "&amp;");
     
     // Parse the text to the XML Reader
     this.xmlStreamReader =

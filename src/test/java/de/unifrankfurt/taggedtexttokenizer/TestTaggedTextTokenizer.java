@@ -15,7 +15,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
   
   HashMap<String, String[]> testSearchedAttributes = new HashMap<String, String[]>();
   
-  String referenceString = "Reynolds &amp; Simons";
+  String referenceString = "Reynolds & Simons";
   
   String simpleXmlString = "<doc>The tree <species uri='720243'><genus uri='fag394'>Fagus</genus> "
       + "<taxon uri='spec9574'>sylvatica</taxon></species> could not be found in <location "
