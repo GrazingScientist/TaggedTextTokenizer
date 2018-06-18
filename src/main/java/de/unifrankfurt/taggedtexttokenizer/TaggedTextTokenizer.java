@@ -131,7 +131,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
     // Debugging output
     if (DEBUGGING) {
       for (BufferedOutputToken token : outputList) {
-        System.out.println(token.term + " start: " + token.startNode + " / end: " + token.endNode);
+        log.debug(token.term + " start: " + token.startNode + " / end: " + token.endNode);
       }
     }
     
