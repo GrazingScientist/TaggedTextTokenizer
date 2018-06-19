@@ -183,8 +183,8 @@ public final class TaggedTextTokenizer extends Tokenizer {
       typeAtt.setType(token.type);
       
       // Start and end position of the token
-      if (token.startNode < token.endNode) {
-        log.debug("ERROR! Start offset < end offset! Token: " + token.term + "; start: " 
+      if (token.startNode > token.endNode) {
+        log.info("ERROR! Start offset > end offset! Token: " + token.term + "; start: " 
                   + token.startNode + "; end: " + token.endNode);
       }
       offsetAtt.setOffset(token.startNode, token.endNode);

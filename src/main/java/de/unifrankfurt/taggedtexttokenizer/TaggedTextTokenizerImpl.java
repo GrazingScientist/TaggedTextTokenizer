@@ -55,7 +55,7 @@ public class TaggedTextTokenizerImpl {
   private static boolean DEBUGGING = false;
   private static boolean XML_READER_NAMESPACE_AWARE = false;
   private static final String DUMMY_ROOT = "doc";
-  private static final String SPECIAL_CHARACTERS = "[\\p{Punct}]";
+  private static final String SPECIAL_CHARACTERS = "[\\p{Punct}“”\"]";
   private static final String ALPHANUMERIC_CHARACTERS = "[\\p{Alnum}]";
   private static final String WHITESPACES = "\\p{Space}";
   
@@ -90,8 +90,8 @@ public class TaggedTextTokenizerImpl {
           // Found an opening tag
           case XMLStreamConstants.START_ELEMENT: {
             String tagName = xmlStreamReader.getLocalName();
-            log.debug("Current tag: " + tagName);
-            log.debug("Is tag demanded? " + isTagDemanded(tagName));
+            printMessage("Current tag: " + tagName);
+            printMessage("Is tag demanded? " + isTagDemanded(tagName));
             if (tagName != DUMMY_ROOT && isTagDemanded(tagName)) {
               BufferedOutputTag newTag = createNewOpenTag(tagName);
               openTagList.add(newTag);
@@ -184,15 +184,15 @@ public class TaggedTextTokenizerImpl {
       
     // Only if the tag is demanded
     if (isTagDemanded(tag)) {
-      log.debug("Searched Attributes of tag \"" + tag + "\" :" + searchedAttributes.get(tag));
+      printMessage("Searched Attributes of tag \"" + tag + "\" :" + searchedAttributes.get(tag));
       
       // Get all demanded attributes of the processed tag and
       // read their value in the currently opened tag
       for (String attName : searchedAttributes.get(tag)) {
-        log.debug("Searching Attribute Name: " + attName);
+        printMessage("Searching Attribute Name: " + attName);
         String attValue = xmlStreamReader.getAttributeValue("", attName);
         
-        log.debug("Found: " + attValue);
+        printMessage("Found: " + attValue);
         
         if (attValue != null) {
           
@@ -205,12 +205,10 @@ public class TaggedTextTokenizerImpl {
           
           // Add the attribute value to the tag
           openTag.addAttributes(attName, attValue);
-          log.debug("Added Attribute " + attName + " with the value " + attValue 
+          printMessage("Added Attribute " + attName + " with the value " + attValue 
               + " to " + tag);
-          if (DEBUGGING) {
-            System.out.println("Added Attribute " + attName + " with the value " + attValue 
-                               + " to " + tag);
-          }
+          printMessage("Added Attribute " + attName + " with the value " + attValue 
+                        + " to " + tag);
         }
       }
     }
@@ -227,11 +225,9 @@ public class TaggedTextTokenizerImpl {
     // Get the current position in the text
     int start = getCurrentTextOffset();
     
-    if (DEBUGGING) {
-      System.out.println("Open Position: [Text] " + start + " - [Reader] "
+    printMessage("Open Position: [Text] " + start + " - [Reader] "
                          + xmlStreamReader.getLocation().getCharacterOffset());
-      System.out.println("Open Tag: " + name);
-    }
+    printMessage("Open Tag: " + name);
     
     // Create the new BufferedOpenTag
     // Sets the end offset to "-1". This will be updated when the tag is closed.
@@ -256,9 +252,7 @@ public class TaggedTextTokenizerImpl {
         continue;
       }
       
-      if (DEBUGGING) {
-        System.out.println("Creating single node with text : \"" + alphaNumericOnly + "\"");
-      }
+      printMessage("Creating single node with text : \"" + alphaNumericOnly + "\"");
       
       // Also separate the special characters coming before the token
       String specialCharactersBeforeToken = token.replaceAll(ALPHANUMERIC_CHARACTERS + ".*", "");
@@ -272,7 +266,7 @@ public class TaggedTextTokenizerImpl {
       tag.endNode = incrementTextOffset(alphaNumericOnly);
       tag.addText(alphaNumericOnly);
       
-      log.debug("Add token: \"" + alphaNumericOnly + "\"");
+      printMessage("Add token: \"" + alphaNumericOnly + "\"");
       
       // Store the BufferedOutputTag directly in the output list
       outputList.add(tag);
@@ -281,11 +275,9 @@ public class TaggedTextTokenizerImpl {
       String specialCharactersAfterToken = token.replaceAll(".*" 
           + ALPHANUMERIC_CHARACTERS + "+?", "");
       
-      if (DEBUGGING) {
-        System.out.println("Token: " + token);
-        System.out.println("Special Characters BEFORE Token: " + specialCharactersBeforeToken);
-        System.out.println("Special Characters AFTER Token: " + specialCharactersAfterToken);
-      }
+      printMessage("Token: " + token);
+      printMessage("Special Characters BEFORE Token: " + specialCharactersBeforeToken);
+      printMessage("Special Characters AFTER Token: " + specialCharactersAfterToken);
       
       // Increment the offset counter by 1 to set it to the next token's starting position
       incrementTextOffset(specialCharactersAfterToken.length() + 1);
@@ -294,13 +286,19 @@ public class TaggedTextTokenizerImpl {
   
   /** Close an open tag. */
   private void closeTag(String tagName) throws XMLStreamException {
-    if (DEBUGGING) {
-      System.out.println("Close Tag: " + tagName);
-    }
+    printMessage("Close Tag: " + tagName);
     
     if (isTagDemanded(tagName)) {
       BufferedOutputTag openTag = getLatestOpenTagByName(tagName);
-      openTag.endNode = getCurrentTextOffset() - 1;
+      
+      /* If the tag contains no text or the tag is an empty element (e.g. <test\>), start
+        and end offset are the same
+      */
+      if (openTag.startNode == getCurrentTextOffset()) {
+        openTag.endNode = openTag.startNode;
+      } else {
+        openTag.endNode = getCurrentTextOffset() - 1;
+      }
       
       // Remove the tag for the open tag list and put it into the output list
       // Throw an exception, if there is an inconsistency.
@@ -358,6 +356,8 @@ public class TaggedTextTokenizerImpl {
   /** Increase the text offset counter by the length of the given token. 
     * @return The new text offset */
   private int incrementTextOffset(String token) {
+    printMessage("Increment offset from token " + token + " by " + token.length());
+    
     this.currentTextOffset += token.length();
     
     return this.currentTextOffset;
@@ -367,6 +367,7 @@ public class TaggedTextTokenizerImpl {
    * if the text is on position "0" (i.e. the very first position).
     * @return The new text offset  */
   private int incrementTextOffset(int inc) {
+    printMessage("Increment offset by " + inc);
     if (this.currentTextOffset != 0) {
       this.currentTextOffset += inc;
     }
@@ -384,5 +385,13 @@ public class TaggedTextTokenizerImpl {
     this.openTagList.clear();
     this.outputList.clear();
     this.currentTextOffset = 0;
+  }
+  
+  private void printMessage(String str) {
+    if (DEBUGGING) {
+      System.out.println(str);
+    } else {
+      log.debug(str);
+    }
   }
 }

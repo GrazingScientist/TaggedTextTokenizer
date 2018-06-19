@@ -41,6 +41,14 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
       + "found in <location uri='loc67567'>London</location>, but    in    <location "
       + "uri='loc7g68'>Frankfurt</location>.   </doc>";
   
+  String emptyText = "“<italic><tp:taxon-name><tp:taxon-name-part taxon-name-part-type=\"genus\" "
+      + "reg=\"Tropidodipsas\">T.</tp:taxon-name-part></tp:taxon-name></italic>” <italic><tp:taxon-name>"
+      + "<tp:taxon-name-part taxon-name-part-type=\"genus\" reg=\"Tropidodipsas\"/>"
+      + "<tp:taxon-name-part taxon-name-part-type=\"species\" reg=\"sartorii\">"
+      + "sartorii</tp:taxon-name-part></tp:taxon-name></italic> + "
+      + "<italic><tp:taxon-name><tp:taxon-name-part taxon-name-part-type=\"genus\" reg=\"Geophis\">"
+      + "Geophis</tp:taxon-name-part></tp:taxon-name></italic> +";
+  
   
   /** Test TaggedTextTokenizer. */
   public void testTaggedTextTokenizer() throws Exception {
@@ -153,6 +161,25 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
         new int[] {1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0}
     );
   }*/
+  
+  /** Test for empty elements. */
+  public void testEmptyText() throws Exception {
+    
+    this.testSearchedAttributes.put("tp:taxon-name-part", 
+        new String[] {"taxon-name-part-type", "reg"});
+    
+    
+    Tokenizer stream = getTaggedTextTokenizer(emptyText, true);
+    
+    assertTokenStreamContents(stream,
+        new String[] {"genus", "Tropidodipsas", "T", "genus", "Tropidodipsas", "species", 
+            "sartorii", "sartorii", "genus", "Geophis", "Geophis"},
+        new int[] {1, 1, 1, 5, 5, 5, 5, 5, 15, 15, 15},
+        new int[] {3, 3, 2, 5, 5, 13, 13, 13,22, 22, 22},
+        new String[] {"URI", "URI", "word", "URI", "URI", "URI", "URI", "word", "URI", 
+            "URI", "word"},
+        new int[] {1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0});
+  }
   
   /** Store some test attributes in a map. */
   private void fillAttributeMap() {
