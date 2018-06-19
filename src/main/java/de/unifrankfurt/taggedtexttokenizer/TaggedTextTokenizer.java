@@ -129,10 +129,8 @@ public final class TaggedTextTokenizer extends Tokenizer {
     }
     
     // Debugging output
-    if (DEBUGGING) {
-      for (BufferedOutputToken token : outputList) {
-        log.debug(token.term + " start: " + token.startNode + " / end: " + token.endNode);
-      }
+    for (BufferedOutputToken token : outputList) {
+      log.debug(token.term + " start: " + token.startNode + " / end: " + token.endNode);
     }
     
     return outputList;
@@ -185,6 +183,10 @@ public final class TaggedTextTokenizer extends Tokenizer {
       typeAtt.setType(token.type);
       
       // Start and end position of the token
+      if (token.startNode < token.endNode) {
+        log.debug("ERROR! Start offset < end offset! Token: " + token.term + "; start: " 
+                  + token.startNode + "; end: " + token.endNode);
+      }
       offsetAtt.setOffset(token.startNode, token.endNode);
       
       typeOfPreviouslyStreamedToken = typeAtt.type();
