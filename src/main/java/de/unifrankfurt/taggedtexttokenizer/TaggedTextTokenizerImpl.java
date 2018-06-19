@@ -9,7 +9,6 @@ import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,8 +18,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import org.apache.commons.text.StringEscapeUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +46,10 @@ public class TaggedTextTokenizerImpl {
   /** Stores the demanded tags and their attributes. */
   private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>(); 
   
-  private XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+  private XMLInputFactory xmlInputFactory;
   
   /** Stores the current character position in the text. */
-  private int currentTextOffset;
+  private int currentTextOffset = 0;
 
   // Constants
   private static boolean DEBUGGING = false;
@@ -64,10 +61,14 @@ public class TaggedTextTokenizerImpl {
   
   /** Constructor for the TaggedTextTokenizerImpl. */
   public TaggedTextTokenizerImpl() {
-
+    setXmlReaderProperties();
+  }
+  
+  /** Create a new instance of the XML Reader and set its properties. */
+  private void setXmlReaderProperties() {
+    xmlInputFactory = XMLInputFactory.newInstance();
     // Configures if the XML Reader is sensitive for the given namespaces
     xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, XML_READER_NAMESPACE_AWARE);
-    //xmlInputFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
   }
   
   /** Parse the text to into the xml reader. This is all done in one go, because we need
@@ -163,7 +164,6 @@ public class TaggedTextTokenizerImpl {
     bldr.insert(0, "<" + DUMMY_ROOT + ">");
     bldr.insert(bldr.length(), "</" + DUMMY_ROOT + ">");
     
-    //String xmlText = StringEscapeUtils.escapeHtml4(bldr.toString());
     String xmlText = bldr.toString();
     xmlText = xmlText.replaceAll(" & ", " &amp; ");
     
@@ -378,7 +378,9 @@ public class TaggedTextTokenizerImpl {
     return this.currentTextOffset;
   }
   
+  /** Reset this instance. */
   public void reset() {
+    setXmlReaderProperties();
     this.openTagList.clear();
     this.outputList.clear();
     this.currentTextOffset = 0;

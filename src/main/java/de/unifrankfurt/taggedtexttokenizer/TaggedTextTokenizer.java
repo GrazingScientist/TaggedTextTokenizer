@@ -222,6 +222,8 @@ public final class TaggedTextTokenizer extends Tokenizer {
       scanner.setup(this.input);
       
       this.isParsed = false;
+      this.typeOfPreviouslyStreamedToken = "word";
+      
     } catch (XMLStreamException e) {
       // Has to rethrow the IOException, since otherwise there
       // is no override

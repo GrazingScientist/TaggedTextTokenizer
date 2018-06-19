@@ -117,6 +117,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
     );
   }
   
+  /** Test for an input with an unescaped ampersand. */
   public void testReferenceInput() throws Exception {
     Tokenizer stream = getTaggedTextTokenizer(referenceString, true);
     
@@ -128,6 +129,30 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
         new int[] {1, 1}
     );
   }
+  
+  /** Test Resetting. */
+  /*public void testResettingTokenizer() throws Exception {
+    Tokenizer stream = getTaggedTextTokenizer(simpleXmlString, true);
+    
+    boolean inc = true;
+    while (inc) {
+      inc = stream.incrementToken();
+    }
+    
+    assertTokenStreamContents(stream,
+        new String[]{"The", "tree", "fag394", "720243", "Fagus", "spec9574", "sylvatica", "could",
+            "not", "be", "found", "in", "loc67567", "London", "but", "in", "loc7g68", "Frankfurt"},
+        //start offset
+        new int[] {0, 4, 9, 9, 9, 15, 15, 25, 31, 35, 38, 44, 47, 47, 55, 59, 62, 62},
+        // end offset
+        new int[] {3, 8, 14, 24, 14, 24, 24, 30, 34, 37, 43, 46, 53, 53, 58, 61, 71, 71},
+        //type
+        new String[] {"word", "word", "URI", "URI", "word", "URI", "word", "word", "word", "word",
+            "word", "word", "URI", "word", "word", "word", "URI", "word"},
+        //posIncr
+        new int[] {1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0}
+    );
+  }*/
   
   /** Store some test attributes in a map. */
   private void fillAttributeMap() {
@@ -156,4 +181,3 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
     return stream;
   }
 }
-
