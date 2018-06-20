@@ -35,8 +35,10 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String SEARCH_ATTRIBUTES_FILE = "searchAttributesFile";
+  private static final String INDEX_ALL = "indexAll";
   
   private final String searchedAttributesFiles;
+  private final boolean indexAll;
   private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>();
   
   /** Constructor. */
@@ -44,6 +46,7 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
     super(args);
 
     this.searchedAttributesFiles = args.remove(SEARCH_ATTRIBUTES_FILE);
+    this.indexAll = Boolean.valueOf(args.remove(INDEX_ALL));
 
     if (!args.isEmpty()) {
       throw new IllegalArgumentException("Unknown parameters: " + args);
@@ -53,7 +56,7 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
   /** Create a TaggedTextTokenizer and return it. */
   @Override
   public TaggedTextTokenizer create(AttributeFactory factory) {
-    return new TaggedTextTokenizer(factory, searchedAttributes);
+    return new TaggedTextTokenizer(factory, searchedAttributes, indexAll);
   }
   
   /** Loading of external files. */

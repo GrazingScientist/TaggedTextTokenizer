@@ -6,6 +6,7 @@ package de.unifrankfurt.taggedtexttokenizer;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
@@ -19,7 +20,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
   
   String simpleXmlString = "<doc>The tree <species uri='720243'><genus uri='fag394'>Fagus</genus> "
       + "<taxon uri='spec9574'>sylvatica</taxon></species> could not be found in <location "
-      + "uri='loc67567'>London</location>, but in <location uri='loc7g68'>Frankfurt</location>."
+      + "uri='loc67567'>London</location>, but in <location uri='loc7g68' complete='true'>Frankfurt</location>."
       + "</doc>";
   
   String simpleXmlStringWithSpecialCharacters = "The tree* <species uri='720243'><genus uri='fag394'>&amp;Fagus</genus> "
@@ -74,18 +75,6 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
 
     );
   }
-  
-  /** Test the ignoring special characters. */
-  /*public void testRemovingSpecialCharacters() throws Exception {
-    Tokenizer stream = getTaggedTextTokenizer(simpleXmlStringWithSpecialCharacters, false);
-    
-    assertTokenStreamContents(stream,
-        new String[]{"The", "tree", "Fagus", "sylvatica", "could", "not", "be", "found", "in",
-                     "London", "but", "in", "Frankfurt"},
-        new int[] {0, 4, 11, 17, 29, 37, 41, 44, 50, 53, 61, 65, 68}, //start offset
-        new int[] {3, 8, 16, 26, 34, 40, 43, 49, 52, 59, 64, 67, 77} // end offset
-    );
-  }*/
  
   /** Test the insertion of attributes into the token stream. */
   public void testAttributeInserting() throws Exception {
@@ -138,30 +127,6 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
     );
   }
   
-  /** Test Resetting. */
-  /*public void testResettingTokenizer() throws Exception {
-    Tokenizer stream = getTaggedTextTokenizer(simpleXmlString, true);
-    
-    boolean inc = true;
-    while (inc) {
-      inc = stream.incrementToken();
-    }
-    
-    assertTokenStreamContents(stream,
-        new String[]{"The", "tree", "fag394", "720243", "Fagus", "spec9574", "sylvatica", "could",
-            "not", "be", "found", "in", "loc67567", "London", "but", "in", "loc7g68", "Frankfurt"},
-        //start offset
-        new int[] {0, 4, 9, 9, 9, 15, 15, 25, 31, 35, 38, 44, 47, 47, 55, 59, 62, 62},
-        // end offset
-        new int[] {3, 8, 14, 24, 14, 24, 24, 30, 34, 37, 43, 46, 53, 53, 58, 61, 71, 71},
-        //type
-        new String[] {"word", "word", "URI", "URI", "word", "URI", "word", "word", "word", "word",
-            "word", "word", "URI", "word", "word", "word", "URI", "word"},
-        //posIncr
-        new int[] {1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0}
-    );
-  }*/
-  
   /** Test for empty elements. */
   public void testEmptyText() throws Exception {
     
@@ -181,6 +146,28 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
         new int[] {1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0});
   }
   
+  /** Test to index all tags and attributes. */
+  public void testIndexingAll() throws Exception {
+    
+    Tokenizer stream = getTaggedTextTokenizer(simpleXmlString, false, true);
+    
+    assertTokenStreamContents(stream,
+        new String[]{"The", "tree", "fag394", "720243", "Fagus", "spec9574", "sylvatica", "could",
+            "not", "be", "found", "in", "loc67567", "London", "but", "in", "true", "loc7g68", 
+            "Frankfurt"},
+        //start offset
+        new int[] {0, 4, 9, 9, 9, 15, 15, 25, 31, 35, 38, 44, 47, 47, 55, 59, 62, 62, 62},
+        // end offset
+        new int[] {3, 8, 14, 24, 14, 24, 24, 30, 34, 37, 43, 46, 53, 53, 58, 61, 71, 71, 71},
+        //type
+        new String[] {"word", "word", "URI", "URI", "word", "URI", "word", "word", "word", "word",
+            "word", "word", "URI", "word", "word", "word", "URI", "URI", "word"},
+        //posIncr
+        new int[] {1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0}
+    );
+    
+  }
+  
   /** Store some test attributes in a map. */
   private void fillAttributeMap() {
     String[] attributes = new String[1];
@@ -193,12 +180,16 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
   
   /** Setup the TaggedTextTokenizer stream. */
   private Tokenizer getTaggedTextTokenizer(String str, boolean insertAttributes) {
+    return getTaggedTextTokenizer(str, insertAttributes, false);
+  }
+  
+  private Tokenizer getTaggedTextTokenizer(String str, boolean insertAttributes, boolean indexAll) {
     Reader reader = new StringReader(str);
     Tokenizer stream;
     
     fillAttributeMap();
-    if (insertAttributes) {
-      stream = new TaggedTextTokenizer(testSearchedAttributes);
+    if (insertAttributes || indexAll) {
+      stream = new TaggedTextTokenizer(testSearchedAttributes, indexAll);
     } else {
       stream = new TaggedTextTokenizer();
     }

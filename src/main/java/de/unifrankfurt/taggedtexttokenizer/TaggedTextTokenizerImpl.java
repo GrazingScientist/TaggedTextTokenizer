@@ -9,6 +9,7 @@ import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,6 +46,9 @@ public class TaggedTextTokenizerImpl {
 
   /** Stores the demanded tags and their attributes. */
   private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>(); 
+  
+  /** Whether to index all found attributes */
+  private boolean indexAll = false;
   
   private XMLInputFactory xmlInputFactory;
   
@@ -188,7 +192,14 @@ public class TaggedTextTokenizerImpl {
       
       // Get all demanded attributes of the processed tag and
       // read their value in the currently opened tag
-      for (String attName : searchedAttributes.get(tag)) {
+      String[] attributes = {};
+      if (indexAll) {
+        attributes = getAttributes();
+      } else {
+        attributes = searchedAttributes.get(tag);
+      }
+      
+      for (String attName : attributes) {
         printMessage("Searching Attribute Name: " + attName);
         String attValue = xmlStreamReader.getAttributeValue("", attName);
         
@@ -214,9 +225,25 @@ public class TaggedTextTokenizerImpl {
     }
   }
   
+  private String[] getAttributes() {
+    
+    ArrayList<String> attributeNames = new ArrayList<String>();
+    for (int i = 0; i < xmlStreamReader.getAttributeCount(); ++i) {
+      attributeNames.add(xmlStreamReader.getAttributeName(i).toString());
+    }
+    
+    return attributeNames.toArray(new String[0]);
+  }
+  
   /** Returns true, if the the given tag name is searched for. */
   private boolean isTagDemanded(String tag) {
-    return searchedAttributes.keySet().contains(tag);
+    if (!indexAll) {
+      return searchedAttributes.keySet().contains(tag);
+    } else if (tag == DUMMY_ROOT) {
+        return false;
+    } else {
+        return true;
+    }
   }
   
   /** Create a new buffered tag.
@@ -377,6 +404,10 @@ public class TaggedTextTokenizerImpl {
   
   private int getCurrentTextOffset() {
     return this.currentTextOffset;
+  }
+  
+  public void setIndexAll(boolean b) {
+    this.indexAll = b;
   }
   
   /** Reset this instance. */

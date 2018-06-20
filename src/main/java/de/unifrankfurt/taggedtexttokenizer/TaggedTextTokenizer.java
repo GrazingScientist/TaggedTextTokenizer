@@ -46,6 +46,8 @@ public final class TaggedTextTokenizer extends Tokenizer {
   
   // Gives the start and end position of the token
   private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
+  
+  private final boolean indexAll;
 
   /** A private instance of the JFlex-constructed scanner. */
   private TaggedTextTokenizerImpl scanner;
@@ -76,16 +78,23 @@ public final class TaggedTextTokenizer extends Tokenizer {
    * searched tags and within these the searched attributes.
    * @param searchedAttributes HashMap with the key:value = tag:[attributes]
    */
-  public TaggedTextTokenizer(HashMap<String, String[]> searchedAttributes) {
+  public TaggedTextTokenizer(HashMap<String, String[]> searchedAttributes, boolean indexAll) {
     super();
-    init();
+    
     if (searchedAttributes != null) {
       this.searchedAttributes.putAll(searchedAttributes);
     }
+    this.indexAll = indexAll;
+    
+    init();
   }
   
+  /** Constructor. */
   public TaggedTextTokenizer() {
     super();
+    
+    indexAll = false;
+    
     init();
   }
   
@@ -93,15 +102,18 @@ public final class TaggedTextTokenizer extends Tokenizer {
    * {@link org.apache.lucene.util.AttributeFactory}.
    */
   public TaggedTextTokenizer(AttributeFactory factory, HashMap<String, 
-                             String[]> searchedAttributes) {
+                             String[]> searchedAttributes, boolean indexAll) {
     super(factory);
     this.searchedAttributes.putAll(searchedAttributes);
+    this.indexAll = indexAll;
     init();
   }
   
   /** Initializes the reader. */
   private void init() {
     this.scanner = new TaggedTextTokenizerImpl();
+    scanner.setSearchedAttributes(searchedAttributes);
+    scanner.setIndexAll(indexAll);
     isParsed = false;
   }
   
@@ -143,7 +155,6 @@ public final class TaggedTextTokenizer extends Tokenizer {
     
     // Parse the whole XML in one go...
     if (!isParsed) {
-      scanner.setSearchedAttributes(searchedAttributes);
       LinkedList<BufferedOutputTag> outputList = scanner.parse();
       bufferedOutputTokens = insertAttributesInPosition(outputList);
       isParsed = true;
