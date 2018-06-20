@@ -373,14 +373,15 @@ public class TaggedTextTokenizerImpl {
         // i.e. if A has attributes and B does not, A goes first...
         if (a.hasAttributes() && !b.hasAttributes()) {
           return -1;
-        } else {
+        } else if (!a.hasAttributes() && b.hasAttributes()) {
           // ... if B has attributes and A has not, B goes first
-          // (if neither had attributes but they had the same starting position, 
-          // something went terribly wrong!)
           return 1;
+        } else {
+          // ... else both are equal
+          return 0;
         }
       } else {
-        return 0;
+        return 1;
       }
     }
   }

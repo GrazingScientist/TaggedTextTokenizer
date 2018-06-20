@@ -42,6 +42,7 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
       + "found in <location uri='loc67567'>London</location>, but    in    <location "
       + "uri='loc7g68'>Frankfurt</location>.   </doc>";
   
+  // taken from Arteaga et al. (2018)
   String emptyText = "“<italic><tp:taxon-name><tp:taxon-name-part taxon-name-part-type=\"genus\" "
       + "reg=\"Tropidodipsas\">T.</tp:taxon-name-part></tp:taxon-name></italic>” <italic><tp:taxon-name>"
       + "<tp:taxon-name-part taxon-name-part-type=\"genus\" reg=\"Tropidodipsas\"/>"
@@ -167,13 +168,34 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
     );
   }
   
+  /** Test for potential zero token length. */
   public void testTokenWithLengthZero() throws Exception {
-    String zeroTokenString = "<sec sec-type=\"Introduction\" id=\"SECID0EDKAC\"><title>Introduction</title></sec>";
+    String zeroTokenString = "<sec sec-type=\"Introduction\" id=\"SECID0EDKAC\">"
+        + "<title>Introduction</title></sec>";
     
     Tokenizer stream = getTaggedTextTokenizer(zeroTokenString, false, true);
     
     assertTokenStreamContents(stream,
         new String[] {"Introduction", "SECID0EDKAC", "Introduction"});
+  }
+  
+  /** Test that the tokens are returned in appropriate order. */
+  public void testTokenOrder() throws Exception {
+    // taken from Arteaga et al. (2018)
+    String referenceString = "<sec sec-type=\"Introduction\" id=\"SECID0EDKAC\"><title>"
+        + "Introduction</title><p>With 70 currently recognized species (Table <xref "
+        + "ref-type=\"table\" rid=\"T1\">1</xref>), the snail-eaters (tribe <tp:taxon-name>"
+        + "<tp:taxon-name-part taxon-name-part-type=\"tribe\">Dipsadini</tp:taxon-name-part>"
+        + "</tp:taxon-name>) are among the most diverse groups of arboreal snakes ("
+        + "<xref ref-type=\"bibr\" rid=\"B116\">Wallach et al. 2014</xref>; </p></sec>";
+    
+    Tokenizer stream = getTaggedTextTokenizer(referenceString, false, true);
+    
+    assertTokenStreamContents(stream,
+        new String[] {"Introduction", "SECID0EDKAC", "Introduction", "With", "70", "currently",
+            "recognized", "species", "Table", "T1", "table",  "1", "the", "snaileaters", "tribe", 
+            "tribe", "Dipsadini", "are", "among", "the", "most", "diverse", "groups", "of", 
+            "arboreal", "snakes","B116", "bibr",  "Wallach", "et", "al", "2014"});
   }
   
   /** Store some test attributes in a map. */
@@ -206,4 +228,14 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
     
     return stream;
   }
+
+  /* References
+   * Arteaga A, Salazar-Valenzuela D, Mebert K, Peñafiel N, Aguiar G, Sánchez-Nivicela JC, Pyron RA, 
+   * Colston TJ, Cisneros-Heredia DF, Yánez-Muñoz MH, Venegas PJ, Guayasamin JM, Torres-Carvajal O (2018) 
+   * Systematics of South American snail-eating snakes (Serpentes, Dipsadini), with the description of 
+   * five new species from Ecuador and Peru. ZooKeys 766: 79-147. https://doi.org/10.3897/zookeys.766.24523
+   */
+
 }
+
+

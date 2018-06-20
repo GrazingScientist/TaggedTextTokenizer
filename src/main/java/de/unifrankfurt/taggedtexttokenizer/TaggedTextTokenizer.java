@@ -129,7 +129,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
     while (it.hasNext()) {
       BufferedOutputTag tag = it.next();
       
-      log.debug(tag + " has attributes: " + tag.hasAttributes());
+      log.debug(tag.tagName + " has attributes: " + tag.hasAttributes());
       
       if (tag.hasAttributes()) {
         for (String att : tag.attributes.keySet()) {
