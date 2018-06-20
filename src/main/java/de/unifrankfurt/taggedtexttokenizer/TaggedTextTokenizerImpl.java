@@ -38,7 +38,7 @@ public class TaggedTextTokenizerImpl {
   private static boolean DEBUGGING = false;
   private static boolean XML_READER_NAMESPACE_AWARE = false;
   private static final String DUMMY_ROOT = "doc";
-  private static final String SPECIAL_CHARACTERS = "[\\p{Punct}“”\"]";
+  private static final String SPECIAL_CHARACTERS = "[!\"#$%&'()*,./:+;<=>?@\\[\\]^_`{|}~“”\"]";
   private static final String ALPHANUMERIC_CHARACTERS = "[\\p{Alnum}]";
   private static final String WHITESPACES = "\\p{Space}";
   

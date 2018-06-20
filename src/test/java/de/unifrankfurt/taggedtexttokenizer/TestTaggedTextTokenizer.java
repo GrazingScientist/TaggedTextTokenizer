@@ -182,20 +182,23 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
   /** Test that the tokens are returned in appropriate order. */
   public void testTokenOrder() throws Exception {
     // taken from Arteaga et al. (2018)
-    String referenceString = "<sec sec-type=\"Introduction\" id=\"SECID0EDKAC\"><title>"
-        + "Introduction</title><p>With 70 currently recognized species (Table <xref "
+    String referenceString = "With 70 currently recognized species (Table <xref "
         + "ref-type=\"table\" rid=\"T1\">1</xref>), the snail-eaters (tribe <tp:taxon-name>"
         + "<tp:taxon-name-part taxon-name-part-type=\"tribe\">Dipsadini</tp:taxon-name-part>"
-        + "</tp:taxon-name>) are among the most diverse groups of arboreal snakes ("
-        + "<xref ref-type=\"bibr\" rid=\"B116\">Wallach et al. 2014</xref>; </p></sec>";
+        + "</tp:taxon-name>) are among the most diverse groups of arboreal snakes.";
     
     Tokenizer stream = getTaggedTextTokenizer(referenceString, false, true);
     
     assertTokenStreamContents(stream,
-        new String[] {"Introduction", "SECID0EDKAC", "Introduction", "With", "70", "currently",
-            "recognized", "species", "Table", "T1", "table",  "1", "the", "snaileaters", "tribe", 
+        new String[] {"With", "70", "currently",
+            "recognized", "species", "Table", "T1", "table",  "1", "the", "snail-eaters", "tribe", 
             "tribe", "Dipsadini", "are", "among", "the", "most", "diverse", "groups", "of", 
-            "arboreal", "snakes","B116", "bibr",  "Wallach", "et", "al", "2014"});
+            "arboreal", "snakes"},
+        new int[] {0, 5, 8, 18, 29, 38, 44, 44, 44, 48, 52, 66, 72, 72, 83, 87, 93, 97, 102,
+            110, 117, 120, 129},
+        new int[] {4, 7, 17, 28, 36, 43, 45, 45, 45, 51, 64, 71, 81, 81, 86, 92, 96, 101, 
+            109, 116, 119, 128, 135}
+    );
   }
   
   /** Store some test attributes in a map. */
