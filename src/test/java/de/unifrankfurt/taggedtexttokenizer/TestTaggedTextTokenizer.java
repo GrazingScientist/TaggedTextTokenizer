@@ -165,7 +165,15 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
         //posIncr
         new int[] {1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0}
     );
+  }
+  
+  public void testTokenWithLengthZero() throws Exception {
+    String zeroTokenString = "<sec sec-type=\"Introduction\" id=\"SECID0EDKAC\"><title>Introduction</title></sec>";
     
+    Tokenizer stream = getTaggedTextTokenizer(zeroTokenString, false, true);
+    
+    assertTokenStreamContents(stream,
+        new String[] {"Introduction", "SECID0EDKAC", "Introduction"});
   }
   
   /** Store some test attributes in a map. */

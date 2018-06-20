@@ -133,7 +133,10 @@ public final class TaggedTextTokenizer extends Tokenizer {
       
       if (tag.hasAttributes()) {
         for (String att : tag.attributes.keySet()) {
-          outputList.add(createNewBufferedOutputToken(tag, tag.getAttributeValue(att), TYPE_URI));
+          String value = tag.getAttributeValue(att);
+          if (value != "") {
+            outputList.add(createNewBufferedOutputToken(tag, value, TYPE_URI));
+          }
         }
       } else {
         outputList.add(createNewBufferedOutputToken(tag, tag.term, "word"));

@@ -34,6 +34,14 @@ public class TaggedTextTokenizerImpl {
   
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
+  // Constants
+  private static boolean DEBUGGING = false;
+  private static boolean XML_READER_NAMESPACE_AWARE = false;
+  private static final String DUMMY_ROOT = "doc";
+  private static final String SPECIAL_CHARACTERS = "[\\p{Punct}“”\"]";
+  private static final String ALPHANUMERIC_CHARACTERS = "[\\p{Alnum}]";
+  private static final String WHITESPACES = "\\p{Space}";
+  
   /** The reader to store the given xml data. */
   private XMLStreamReader xmlStreamReader;
   
@@ -47,21 +55,13 @@ public class TaggedTextTokenizerImpl {
   /** Stores the demanded tags and their attributes. */
   private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>(); 
   
-  /** Whether to index all found attributes */
+  /** Whether to index all found attributes. */
   private boolean indexAll = false;
   
   private XMLInputFactory xmlInputFactory;
   
   /** Stores the current character position in the text. */
   private int currentTextOffset = 0;
-
-  // Constants
-  private static boolean DEBUGGING = false;
-  private static boolean XML_READER_NAMESPACE_AWARE = false;
-  private static final String DUMMY_ROOT = "doc";
-  private static final String SPECIAL_CHARACTERS = "[\\p{Punct}“”\"]";
-  private static final String ALPHANUMERIC_CHARACTERS = "[\\p{Alnum}]";
-  private static final String WHITESPACES = "\\p{Space}";
   
   /** Constructor for the TaggedTextTokenizerImpl. */
   public TaggedTextTokenizerImpl() {
@@ -218,8 +218,6 @@ public class TaggedTextTokenizerImpl {
           openTag.addAttributes(attName, attValue);
           printMessage("Added Attribute " + attName + " with the value " + attValue 
               + " to " + tag);
-          printMessage("Added Attribute " + attName + " with the value " + attValue 
-                        + " to " + tag);
         }
       }
     }
@@ -237,12 +235,20 @@ public class TaggedTextTokenizerImpl {
   
   /** Returns true, if the the given tag name is searched for. */
   private boolean isTagDemanded(String tag) {
+    // Do not process tag, when it has no attributes and ignore the corresponding end tag
+    if (xmlStreamReader.isStartElement() && xmlStreamReader.getAttributeCount() == 0
+        || xmlStreamReader.isEndElement() && getLatestOpenTagByName(tag) == null) {
+      return false;
+    }
+    
+    // If all tags should be indexed, ignore any given list
     if (!indexAll) {
       return searchedAttributes.keySet().contains(tag);
     } else if (tag == DUMMY_ROOT) {
-        return false;
+      // ignore the dummy tag
+      return false;
     } else {
-        return true;
+      return true;
     }
   }
   
@@ -329,7 +335,7 @@ public class TaggedTextTokenizerImpl {
       
       // Remove the tag for the open tag list and put it into the output list
       // Throw an exception, if there is an inconsistency.
-      openTagList.remove(openTag);
+      openTagList.removeLastOccurrence(openTag);
       outputList.add(openTag);
     }
   }
@@ -346,7 +352,6 @@ public class TaggedTextTokenizerImpl {
         return openTag;
       }
     }
-    
     return null;
   }
   
