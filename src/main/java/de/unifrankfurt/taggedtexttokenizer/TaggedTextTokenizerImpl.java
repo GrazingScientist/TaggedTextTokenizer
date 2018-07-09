@@ -421,7 +421,6 @@ public class TaggedTextTokenizerImpl {
     setXmlReaderProperties();
     this.openTagList.clear();
     this.outputList.clear();
-    this.currentTextOffset = 0;
   }
   
   private void printMessage(String str) {
