@@ -19,7 +19,11 @@ import java.lang.reflect.Type;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.analysis.util.ResourceLoader;
@@ -36,10 +40,13 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
 
   private static final String SEARCH_ATTRIBUTES_FILE = "searchAttributesFile";
   private static final String INDEX_ALL = "indexAll";
+  private static final String EXCLUDE_ATTRIBUTE_FILE = "excludeAttributesFile";
   
   private final String searchedAttributesFiles;
   private final boolean indexAll;
+  private final String excludeAttributesFile;
   private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>();
+  private List<String> excludedAttributes = new ArrayList<String>();
   
   /** Constructor. */
   public TaggedTextTokenizerFactory(Map<String, String> args) {
@@ -47,6 +54,7 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
 
     this.searchedAttributesFiles = args.remove(SEARCH_ATTRIBUTES_FILE);
     this.indexAll = Boolean.valueOf(args.remove(INDEX_ALL));
+    this.excludeAttributesFile = args.remove(EXCLUDE_ATTRIBUTE_FILE);
 
     if (!args.isEmpty()) {
       throw new IllegalArgumentException("Unknown parameters: " + args);
@@ -56,13 +64,12 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
   /** Create a TaggedTextTokenizer and return it. */
   @Override
   public TaggedTextTokenizer create(AttributeFactory factory) {
-    return new TaggedTextTokenizer(factory, searchedAttributes, indexAll);
+    return new TaggedTextTokenizer(factory, searchedAttributes, excludedAttributes, indexAll);
   }
   
   /** Loading of external files. */
   @Override
   public void inform(ResourceLoader loader) throws IOException {
-    
     if (searchedAttributesFiles != null) {
       try (InputStream stream = loader.openResource(searchedAttributesFiles)) {
         CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder()
@@ -72,7 +79,28 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
         JsonElement element = new JsonParser().parse(new InputStreamReader(stream, decoder));
         Type type = new TypeToken<HashMap<String, String[]>>(){}.getType();
         this.searchedAttributes = new Gson().fromJson(element, type);
+      } catch (IOException e) {
+        this.searchedAttributes = new HashMap<String, String[]>();
       }
     }
+    
+    if (excludeAttributesFile != null) {
+      try (InputStream stream = loader.openResource(excludeAttributesFile)) {
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        String inputString = new InputStreamReader(stream, decoder).toString();
+        this.excludedAttributes = ArrayList(inputString.split(","));
+        
+      } catch (IOException e) {
+        this.excludedAttributes = new ArrayList<String>();
+      }
+    }
+  }
+
+  private List<String> ArrayList(String[] split) {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

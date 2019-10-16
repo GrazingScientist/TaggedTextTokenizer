@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import de.unifrankfurt.taggedtexttokenizer.TaggedTextTokenizer;
@@ -201,6 +202,16 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
     );
   }
   
+  /*public void testMinusRemoval() throws Exception {
+    String minimalString = "- 9 - Verbands-, Ordnung";
+    
+    Tokenizer stream = getTaggedTextTokenizer(minimalString, false, false);
+    assertTokenStreamContents(stream,
+        new String[] {"9", "Verbands-", "Ordnung"}
+    );
+  }*/
+  
+  
   /** Store some test attributes in a map. */
   private void fillAttributeMap() {
     String[] attributes = new String[1];
@@ -221,8 +232,9 @@ public class TestTaggedTextTokenizer extends BaseTokenStreamTestCase {
     Tokenizer stream;
     
     fillAttributeMap();
+    List<String> excludedAttributes = new ArrayList<String>();
     if (insertAttributes || indexAll) {
-      stream = new TaggedTextTokenizer(testSearchedAttributes, indexAll);
+      stream = new TaggedTextTokenizer(testSearchedAttributes, excludedAttributes, indexAll);
     } else {
       stream = new TaggedTextTokenizer();
     }

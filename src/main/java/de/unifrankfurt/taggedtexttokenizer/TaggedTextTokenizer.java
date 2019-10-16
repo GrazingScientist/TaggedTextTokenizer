@@ -8,9 +8,11 @@ import de.unifrankfurt.taggedtexttokenizer.BufferedOutputTag;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import javax.xml.stream.XMLStreamException;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -53,6 +55,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
   private TaggedTextTokenizerImpl scanner;
   
   private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>();
+  private List<String> excludedAttributes = new ArrayList<String>();
   private LinkedList<BufferedOutputToken> bufferedOutputTokens = 
       new LinkedList<BufferedOutputToken>();
   
@@ -78,11 +81,15 @@ public final class TaggedTextTokenizer extends Tokenizer {
    * searched tags and within these the searched attributes.
    * @param searchedAttributes HashMap with the key:value = tag:[attributes]
    */
-  public TaggedTextTokenizer(HashMap<String, String[]> searchedAttributes, boolean indexAll) {
+  public TaggedTextTokenizer(HashMap<String, String[]> searchedAttributes, 
+      List<String> excludedAttributes, boolean indexAll) {
     super();
     
     if (searchedAttributes != null) {
       this.searchedAttributes.putAll(searchedAttributes);
+    }
+    if (excludedAttributes != null) {
+      this.excludedAttributes = excludedAttributes;
     }
     this.indexAll = indexAll;
     
@@ -102,10 +109,18 @@ public final class TaggedTextTokenizer extends Tokenizer {
    * {@link org.apache.lucene.util.AttributeFactory}.
    */
   public TaggedTextTokenizer(AttributeFactory factory, HashMap<String, 
-                             String[]> searchedAttributes, boolean indexAll) {
+                             String[]> searchedAttributes, 
+                             List<String> excludedAttributes, 
+                             boolean indexAll) {
     super(factory);
-    this.searchedAttributes.putAll(searchedAttributes);
+    if (searchedAttributes != null) {
+      this.searchedAttributes.putAll(searchedAttributes);
+    }
+    if (excludedAttributes != null) {
+      this.excludedAttributes = excludedAttributes;
+    }
     this.indexAll = indexAll;
+    
     init();
   }
   
@@ -113,6 +128,7 @@ public final class TaggedTextTokenizer extends Tokenizer {
   private void init() {
     this.scanner = new TaggedTextTokenizerImpl();
     scanner.setSearchedAttributes(searchedAttributes);
+    scanner.setExcludedAttributes(excludedAttributes);
     scanner.setIndexAll(indexAll);
     isParsed = false;
   }

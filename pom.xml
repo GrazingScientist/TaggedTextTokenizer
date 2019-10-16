@@ -7,6 +7,30 @@
     <lucene-version>7.3.0</lucene-version>
     <slf4j-version>1.7.25</slf4j-version>
   </properties>
+  
+  <repositories>
+    <repository>
+        <id>hu-central</id>
+        <name>alba-releases</name>
+        <url>http://service.hucompute.org/artifactory/libs-snapshot-local</url>
+    </repository>
+    <repository>
+        <id>central</id>
+        <name>Maven Plugin Repository</name>
+        <url>http://repo1.maven.org/maven2</url>
+    </repository>
+    <repository>
+        <id>ukp-oss-model-releases</id>
+        <url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-model-releases-local</url>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+    </repository>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
 
   <dependencies>
 
@@ -66,6 +90,24 @@
         <artifactId>slf4j-simple</artifactId>
         <version>${slf4j-version}</version>
         <scope>runtime</scope>
+    </dependency>
+    
+    <dependency>
+        <groupId>com.github.texttechnologylab</groupId>
+        <artifactId>textimager-client</artifactId>
+        <version>1f8f76e583</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.texttechnologylab.annotation</groupId>
+        <artifactId>typesystem</artifactId>
+        <version>1.6</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.hucompute</groupId>
+        <artifactId>utilities</artifactId>
+        <version>0.1</version>
     </dependency>
 
 

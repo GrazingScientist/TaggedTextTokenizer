@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-
+import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -53,7 +53,10 @@ public class TaggedTextTokenizerImpl {
   private LinkedList<BufferedOutputTag> outputList = new LinkedList<BufferedOutputTag>();
 
   /** Stores the demanded tags and their attributes. */
-  private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>(); 
+  private HashMap<String, String[]> searchedAttributes = new HashMap<String, String[]>();
+  
+  /** Stores all NON-demanded tags and their attributes. */
+  private List<String> excludedAttributes = new ArrayList<String>(); 
   
   /** Whether to index all found attributes. */
   private boolean indexAll = false;
@@ -152,6 +155,10 @@ public class TaggedTextTokenizerImpl {
     this.searchedAttributes.putAll(searchedAttributes);
   }
   
+  public void setExcludedAttributes(List<String> excludedAttributes) {
+    this.excludedAttributes = excludedAttributes;
+  }
+  
   /** Read the input text and hand it to the XML Reader. */
   public void setup(java.io.Reader input) throws XMLStreamException, IOException {
     StringBuilder bldr = new StringBuilder();
@@ -224,10 +231,14 @@ public class TaggedTextTokenizerImpl {
   }
   
   private String[] getAttributes() {
-    
     ArrayList<String> attributeNames = new ArrayList<String>();
     for (int i = 0; i < xmlStreamReader.getAttributeCount(); ++i) {
-      attributeNames.add(xmlStreamReader.getAttributeName(i).toString());
+      String att = xmlStreamReader.getAttributeName(i).toString();
+      
+      // Only add attribute to list, if it should not be excluded.
+      if (!this.excludedAttributes.contains(att)) {
+        attributeNames.add(att);
+      }
     }
     
     return attributeNames.toArray(new String[0]);
