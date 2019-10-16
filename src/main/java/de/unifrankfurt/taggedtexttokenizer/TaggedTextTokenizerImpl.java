@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -199,11 +201,18 @@ public class TaggedTextTokenizerImpl {
       
       // Get all demanded attributes of the processed tag and
       // read their value in the currently opened tag
-      String[] attributes = {};
+      List<String> attributes;
       if (indexAll) {
         attributes = getAttributes();
       } else {
-        attributes = searchedAttributes.get(tag);
+        String[] tempAttributes = searchedAttributes.get(tag);
+        List<String> fineAttributes = new ArrayList<String>();
+        for (String att : tempAttributes) {
+          if (!excludedAttributes.contains(att)) {
+            fineAttributes.add(att);
+          }
+        }
+        attributes = fineAttributes;
       }
       
       for (String attName : attributes) {
@@ -230,7 +239,7 @@ public class TaggedTextTokenizerImpl {
     }
   }
   
-  private String[] getAttributes() {
+  private List<String> getAttributes() {
     ArrayList<String> attributeNames = new ArrayList<String>();
     for (int i = 0; i < xmlStreamReader.getAttributeCount(); ++i) {
       String att = xmlStreamReader.getAttributeName(i).toString();
@@ -241,7 +250,7 @@ public class TaggedTextTokenizerImpl {
       }
     }
     
-    return attributeNames.toArray(new String[0]);
+    return attributeNames;
   }
   
   /** Returns true, if the the given tag name is searched for. */

@@ -47,6 +47,8 @@ public class TestTaggedTextTokenizerFactory extends BaseTokenStreamFactoryTestCa
       + "  ]"
       + "}";
   
+  String excludeAttributes = "taxon-name-part-type, uri";
+  
   /** Test TaggedTextTokenizerFactory. */
   public void testTaggedTextTokenizerFactory() throws Exception {
     
@@ -72,6 +74,31 @@ public class TestTaggedTextTokenizerFactory extends BaseTokenStreamFactoryTestCa
             146, 154, 158, 158, 158, 171, 180, 191, 194, 198, 206, 211, 211, 211, 214, 214, 214, 228}, //start offset
         new int[] {3, 11, 16, 22, 28, 31, 31, 30, 38, 38, 38, 48, 57, 62, 66, 72, 78, 84, 88, 101, 109, 113, 118, 124, 128, 138, 141, 145,
             153, 157, 170, 170, 170, 178, 190, 193, 197, 205, 210, 213, 213, 212, 227, 227, 227, 237} // end offset
+    );
+  }
+  
+public void testAttributeExclusion() throws Exception {
+    
+    Reader reader = new StringReader(complexXmlString);
+    
+    HashMap<String, String> args = new HashMap<String, String>();
+    // It's a trap! Only necessary to fulfill an IF-clause.
+    args.put("excludeAttributesFile", "test_exclude_attributes.txt");
+    args.put("indexAll", "true");
+
+    TaggedTextTokenizerFactory factory = new TaggedTextTokenizerFactory(args);
+    StringMockResourceLoader loader = new StringMockResourceLoader(excludeAttributes);
+    factory.inform(loader);
+    
+    Tokenizer stream = factory.create(newAttributeFactory());
+    stream.setReader(reader);
+    
+    assertTokenStreamContents(stream,
+        new String[]{"For", "example", "the", "Costa", "Rican", "Cyclocephala", "C", "unamas", "unamas", 
+                     "Ratcliffe", "Spanish", "una", "mas", "was", "named", "after", "the", "overwhelming", "feeling", "one", "gets",
+                     "after", "the", "discovery", "of", "yet", "another", "new", "Cyclocephala", "Cyclocephala", "species",
+                     "epitomized", "by", "the", "species", "name", "Cyclocephala", "C", "nodanotherwon",
+                     "nodanotherwon", "Ratcliffe"}
     );
   }
   

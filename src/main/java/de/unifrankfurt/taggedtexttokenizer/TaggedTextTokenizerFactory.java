@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,9 +92,8 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
             .onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
 
-        String inputString = new InputStreamReader(stream, decoder).toString();
-        this.excludedAttributes = ArrayList(inputString.split(","));
-        
+        String inputString = IOUtils.toString(new InputStreamReader(stream, decoder));
+        this.excludedAttributes = Arrays.asList(inputString.split(","));
       } catch (IOException e) {
         this.excludedAttributes = new ArrayList<String>();
       }
