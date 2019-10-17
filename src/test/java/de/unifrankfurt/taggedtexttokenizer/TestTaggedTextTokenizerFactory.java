@@ -47,7 +47,7 @@ public class TestTaggedTextTokenizerFactory extends BaseTokenStreamFactoryTestCa
       + "  ]"
       + "}";
   
-  String excludeAttributes = "taxon-name-part-type, uri";
+  String excludeAttributes = "timexvalue, class";
   
   /** Test TaggedTextTokenizerFactory. */
   public void testTaggedTextTokenizerFactory() throws Exception {
@@ -79,7 +79,8 @@ public class TestTaggedTextTokenizerFactory extends BaseTokenStreamFactoryTestCa
   
 public void testAttributeExclusion() throws Exception {
     
-    Reader reader = new StringReader(complexXmlString);
+    //Reader reader = new StringReader(complexXmlString);
+    Reader reader = new StringReader("<em class=\"times\" timexvalue=\"1909-09-09\" wikipedia-title=\"wiki-Test\">Das ist ein Test</em>");
     
     HashMap<String, String> args = new HashMap<String, String>();
     // It's a trap! Only necessary to fulfill an IF-clause.
@@ -94,11 +95,7 @@ public void testAttributeExclusion() throws Exception {
     stream.setReader(reader);
     
     assertTokenStreamContents(stream,
-        new String[]{"For", "example", "the", "Costa", "Rican", "Cyclocephala", "C", "unamas", "unamas", 
-                     "Ratcliffe", "Spanish", "una", "mas", "was", "named", "after", "the", "overwhelming", "feeling", "one", "gets",
-                     "after", "the", "discovery", "of", "yet", "another", "new", "Cyclocephala", "Cyclocephala", "species",
-                     "epitomized", "by", "the", "species", "name", "Cyclocephala", "C", "nodanotherwon",
-                     "nodanotherwon", "Ratcliffe"}
+        new String[]{"wiki-Test", "Das", "ist", "ein", "Test"}
     );
   }
   
