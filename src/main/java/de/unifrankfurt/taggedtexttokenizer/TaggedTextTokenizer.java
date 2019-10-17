@@ -187,9 +187,10 @@ public final class TaggedTextTokenizer extends Tokenizer {
    * Returns true as long as there are tokens in the buffer.  */
   private boolean setNextToken() throws IOException {
     if (!bufferedOutputTokens.isEmpty()) {
-      BufferedOutputToken token = bufferedOutputTokens.poll();;
+      BufferedOutputToken token = bufferedOutputTokens.poll();
       
-      while (token.term.length() == 0 && token != null) {
+      // Make sure no empty strings are parsed
+      while (token != null && token.term.length() == 0) {
         token = bufferedOutputTokens.poll();
       }
       

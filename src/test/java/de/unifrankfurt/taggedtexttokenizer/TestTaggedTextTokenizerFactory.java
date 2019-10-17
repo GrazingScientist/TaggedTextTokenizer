@@ -77,7 +77,7 @@ public class TestTaggedTextTokenizerFactory extends BaseTokenStreamFactoryTestCa
     );
   }
   
-public void testAttributeExclusion() throws Exception {
+  public void testAttributeExclusion() throws Exception {
     
     //Reader reader = new StringReader(complexXmlString);
     Reader reader = new StringReader("<em class=\"times\" timexvalue=\"1909-09-09\" wikipedia-title=\"wiki-Test\">Das ist ein Test</em>");
@@ -98,5 +98,34 @@ public void testAttributeExclusion() throws Exception {
         new String[]{"wiki-Test", "Das", "ist", "ein", "Test"}
     );
   }
+  
+public void testSentence() throws Exception {
+    
+    //Reader reader = new StringReader(complexXmlString);
+    Reader reader = new StringReader("<ocrpage><sentence id=\"24555\">Man tritt von der Strasse von <em class=\"location_place\" "
+        + "wikidata=\"http://www.wikidata.org/entity/Q180274\" wikipedia-title=\"Kathedrale_von_Chartres\">Chartres</em> aus durch"
+        + " ein <em class=\"artifact\" wikidata=\"http://www.wikidata.org/entity/Q854429\" wikipedia-title=\"Portal_(Architektur)\">"
+        + "Portal</em> in <em class=\"taxon\" "
+        + "wikidata=\"http://www.wikidata.org/entity/Q18976362\"><em class=\"taxon\">das</em></em></sentence> </ocrpage>\n");
+    
+    HashMap<String, String> args = new HashMap<String, String>();
+    // It's a trap! Only necessary to fulfill an IF-clause.
+    args.put("excludeAttributesFile", "test_exclude_attributes.txt");
+    args.put("indexAll", "true");
+
+    TaggedTextTokenizerFactory factory = new TaggedTextTokenizerFactory(args);
+    StringMockResourceLoader loader = new StringMockResourceLoader("class, wikipedia-title, class");
+    factory.inform(loader);
+    
+    Tokenizer stream = factory.create(newAttributeFactory());
+    stream.setReader(reader);
+    
+    assertTokenStreamContents(stream,
+        new String[]{"24555", "Man", "tritt", "von", "der", "Strasse", "von", "http://www.wikidata.org/entity/Q180274", "Chartres", "aus", "durch", "ein", 
+            "http://www.wikidata.org/entity/Q854429", "Portal", "in", "http://www.wikidata.org/entity/Q18976362", "das" }
+    );
+  }
+
+
   
 }
