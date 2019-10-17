@@ -94,6 +94,12 @@ public class TaggedTextTokenizerFactory extends TokenizerFactory implements Reso
 
         String inputString = IOUtils.toString(new InputStreamReader(stream, decoder));
         this.excludedAttributes = Arrays.asList(inputString.split(","));
+        
+        // Remove all leading and trailing whitespaces
+        for (int i = 0; i < this.excludedAttributes.size(); ++i) {
+          String e = this.excludedAttributes.get(i);
+          this.excludedAttributes.set(i, e.trim());
+        }
       } catch (IOException e) {
         this.excludedAttributes = new ArrayList<String>();
       }

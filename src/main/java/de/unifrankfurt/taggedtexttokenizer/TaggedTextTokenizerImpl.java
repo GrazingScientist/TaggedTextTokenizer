@@ -245,6 +245,7 @@ public class TaggedTextTokenizerImpl {
       String att = xmlStreamReader.getAttributeName(i).toString();
       
       // Only add attribute to list, if it should not be excluded.
+      boolean t = this.excludedAttributes.contains(att);
       if (!this.excludedAttributes.contains(att)) {
         attributeNames.add(att);
       }
