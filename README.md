@@ -1,8 +1,6 @@
 [![Build Status](https://travis-ci.org/GrazingScientist/TaggedTextTokenizer.svg?branch=master)](https://travis-ci.org/GrazingScientist/TaggedTextTokenizer)
 
 # TaggedTextTokenizer
--- Under Development --
-
 The TaggedTextTokenizer was invented to improve the search results in Apache Lucene, by indexing XML files that contain semantic information of the tagged words. While the SynonymGraphFilter may be applicable in some cases to improve the search result, it will not work with ambiguous words (for example, try SynonymGraphFilter with the word 'break' ;) ). When you have tagged words and their respective attribute-value pairs in an XML, you can be precise for the meaning of every single word.
 
 The TaggedTextTokenizer is able to index text like this:
